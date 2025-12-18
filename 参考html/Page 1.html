@@ -1,0 +1,496 @@
+
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                  <meta charset="UTF-8">
+                  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  <meta name="color-scheme" content="light">
+                  <meta name="supported-color-schemes" content="light">
+                  <title>Page 1</title>
+                  <style>
+                    *,
+                    *::before,
+                    *::after {
+                      box-sizing: border-box;
+                      margin: 0;
+                    }
+                    .iframe-outer {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      bottom: 0;
+                      right: 0;
+                      display: flex;
+                      justify-content: center;
+                      background-color: #E0E0E0;
+                    }
+                    .iframe-wrapper {
+                      width: 100%;
+                      height: 100%;
+                      margin: 0 auto;
+                      transform-origin: center top;
+                      flex-shrink: 0;
+                    }
+                    #dynamicIframe {
+                      border: none;
+                      width: 100%;
+                      height: 100%;
+                    }
+                  </style>
+                  <script>
+                const width = 402
+                const height = 874
+                const resolutionRatio = width && height ? width / height : 1
+                const pageNameMap = {
+                  'page_1': 'Page 1',
+    'page_2': 'Page 2',
+    'page_3': 'Page 3',
+    'page_4': 'Page 4',
+    'page_5': 'Page 5',
+    'page_6': 'Page 6',
+    'page_7': 'Page 7',
+    'page_8': 'Page 8',
+    'page_9': 'Page 9',
+    'page_10': 'Page 10'
+                }
+                const allPageIds = ["page_1","page_2","page_3","page_4","page_5","page_6","page_7","page_8","page_9","page_10"]
+                const allFormatPageIdsMap = {"page_1":"page-1","page_2":"page-2","page_3":"page-3","page_4":"page-4","page_5":"page-5","page_6":"page-6","page_7":"page-7","page_8":"page-8","page_9":"page-9","page_10":"page-10"}
+                const IFRAME_MESSAGE_TYPE = {
+                  iframeNavigation: 'iframeNavigation',
+                }
+                const safeAddEventListener = function Tc(e,t,r,n=!1){e.removeEventListener(t,r,n),e.addEventListener(t,r,n)}
+                const processOnclick = (e,t,r)=>{if(r){const n=Pw(t);if(n.methodName&&Lp(n.methodName,r))return;e.preventDefault(),e.stopPropagation();const s=n.args||[],i=(s==null?void 0:s.find(u=>u))||"";i&&Mp(i)}}
+                const checkIframeMethod = (e,t)=>{try{return typeof t[e]=="function"||typeof t[e]=="function"}catch(r){return!1}}
+                const postIframeMessage = (targetPageId) => {
+                  window.parent.postMessage({
+                    type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                    targetPageId,
+                  })
+                }
+                const handleIframeLinkClick = (event) => {
+                  const dynamicIframe = document.querySelector('#dynamicIframe')
+                  if (!dynamicIframe?.contentWindow) {
+                    return
+                  }
+                  const link = event.target.closest('a')
+                  const target = event.target
+                  if (link) {
+                    const href = link.getAttribute('href')
+                    const onclick = link.getAttribute('onclick')
+                    if (href && href !== '#' && !href.startsWith('javascript:')) {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      const targetPageId = getKeyByValueObj(allFormatPageIdsMap, href)
+                      if (targetPageId) {
+                        postIframeMessage(targetPageId)
+                      }
+                      return
+                    }
+                    if (onclick) {
+                      processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                    } else {
+                      event.preventDefault()
+                      event.stopPropagation() 
+                    }
+                    return
+                  }
+                  const onclick = target.getAttribute('onclick')
+                  if (onclick) {
+                    processOnclick(event, onclick, iframe.contentWindow, allFormatPageIdsMap)
+                  }
+                }
+                function stringExt(link) {
+                  let s = String(link || '')
+                  s = (s.split('#')[0] || '')
+                  s = (s.split('?')[0] || '')
+                  s = s.trim()
+                  s = s.split('/').filter(Boolean).pop() || ''
+                  const lower = s.toLowerCase()
+                  if (lower.endsWith('.html') || lower.endsWith('.php') || lower.endsWith('.aspx')) {
+                    s = s.slice(0, s.lastIndexOf('.'))
+                  }
+                  return s
+                }
+                function formatHref(href) {
+                  if (!href) {
+                    return ''
+                  }
+                  try {
+                    const url = new URL(href, window.location.href)
+                    const pathname = url.pathname || ''
+                    return stringExt(pathname)
+                  } catch {
+                    return stringExt(href)
+                  }
+                }
+                function getKeyByValueObj(obj, value) {
+                  const newValue = formatHref(value)
+                  const keyFind = Object.keys(obj).find(k => k === newValue)
+                  if (keyFind) {
+                    return keyFind
+                  }
+                  return Object.keys(obj).find(k => obj[k] === newValue)
+                }
+                function setIframeSize(w, h) {
+                  const currentContainerRadio = w / h
+                  let widthValue = w
+                  let heightValue = h
+                  let zoom = 1
+                  if (currentContainerRadio > resolutionRatio) {
+                    widthValue = h * resolutionRatio
+                    heightValue = h
+                  } else {
+                    widthValue = w
+                    heightValue = w / resolutionRatio
+                  }
+                  zoom = width ? widthValue / width : 1
+                  return {
+                    width: widthValue / zoom + 'px',
+                    height: heightValue / zoom + 'px',
+                    zoom,
+                  }
+                }
+                function adjustIframeSize() {
+                  const iframeWrapper = document.querySelector(".iframe-wrapper")
+                  const { width, height, zoom } = setIframeSize(window.innerWidth, window.innerHeight)
+                  iframeWrapper.style.height = height
+                  iframeWrapper.style.width = width
+                  iframeWrapper.style.transform = 'scale(' + zoom + ')'
+                }
+                function sanitizeFilename(name) {
+                  return name.replace(/[\/:*?"<>|]/g, '_')
+                }
+                function handlePostMessage(event) {
+                  if (!event.data) {
+                    return
+                  }
+                  const { type, targetPageId } = event.data
+                  const targetPageName = pageNameMap[targetPageId]
+                  if (type === "iframeNavigation" && targetPageId && targetPageName) {
+                    window.location.href = targetPageName + '.html'
+                  }
+                }
+                function setupIframeEvents() {
+                  const iframe = document.getElementById('dynamicIframe')
+                  if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                    safeAddEventListener(iframe.contentWindow.document, 'click', handleIframeLinkClick, true)
+                  } else {
+                    setTimeout(setupIframeEvents, 100)
+                  }
+                }
+                window.addEventListener('message', handlePostMessage)
+                window.onload = function() {
+                  adjustIframeSize()
+                  setupIframeEvents()
+                }
+                window.onresize = adjustIframeSize
+                window.onunload = () => {
+                  window.removeEventListener('message', handlePostMessage)
+                }
+              </script>
+                </head>
+                <body>
+                  <div class="iframe-outer">
+                    <div class="iframe-wrapper">
+                      <iframe id="dynamicIframe" srcdoc='<html lang="zh"><head><script>(function(){
+      function stringExt(link) {
+        let s = String(link || &#39;&#39;)
+        s = (s.split(&#39;#&#39;)[0] || &#39;&#39;)
+        s = (s.split(&#39;?&#39;)[0] || &#39;&#39;)
+        s = s.trim()
+        s = s.split(&#39;/&#39;).filter(Boolean).pop() || &#39;&#39;
+        const lower = s.toLowerCase()
+        if (lower.endsWith(&#39;.html&#39;) || lower.endsWith(&#39;.php&#39;) || lower.endsWith(&#39;.aspx&#39;)) {
+          s = s.slice(0, s.lastIndexOf(&#39;.&#39;))
+        }
+        return s
+      }
+      function formatHref(href) {
+        if (!href) {
+          return &#39;&#39;
+        }
+        try {
+          const url = new URL(href, window.location.href)
+          const pathname = url.pathname || &#39;&#39;
+          return stringExt(pathname)
+        } catch {
+          return stringExt(href)
+        }
+      }
+      function getKeyByValueObj(obj, value) {
+        const newValue = formatHref(value)
+        const keyFind = Object.keys(obj).find(k => k === newValue)
+        if (keyFind) {
+          return keyFind
+        }
+        return Object.keys(obj).find(k => obj[k] === newValue)
+      }
+      function emit(to, source){
+        try {
+          if (window.parent) {
+            const allFormatPageIdsMap = {"page_1":"page-1","page_2":"page-2","page_3":"page-3","page_4":"page-4","page_5":"page-5","page_6":"page-6","page_7":"page-7","page_8":"page-8","page_9":"page-9","page_10":"page-10"}
+            const IFRAME_MESSAGE_TYPE = {
+              iframeNavigation: &#39;iframeNavigation&#39;,
+            }
+            const targetPageId = getKeyByValueObj(allFormatPageIdsMap, String(to || &#39;&#39;))
+            if (targetPageId) {
+              window.parent.postMessage({
+                type: IFRAME_MESSAGE_TYPE.iframeNavigation,
+                targetPageId,
+              }, &#39;*&#39;)
+            }
+          }
+        } catch(e) {}
+      }
+      try{
+        if (&#39;navigation&#39; in window &amp;&amp; window.navigation &amp;&amp; typeof window.navigation.addEventListener===&#39;function&#39;){
+          window.navigation.addEventListener(&#39;navigate&#39;, function(e){
+            try{
+              var url = (e.destination &amp;&amp; e.destination.url) || &#39;&#39;;
+              if (e.canIntercept &amp;&amp; typeof e.intercept===&#39;function&#39;){ e.intercept({ handler:function(){} }) }
+              else if (e.preventDefault){ e.preventDefault() }
+              emit(url)
+            }catch(_){}
+          })
+        }
+      }catch(_){}
+    })();</script><meta name="supported-color-schemes" content="light"><meta name="color-scheme" content="light"><style>
+      :root, html, body { color-scheme: light; }
+      html { forced-color-adjust: none; }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="./assets/3/3.1.0/iconify.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&amp;amp;display=swap" rel="stylesheet">
+    <style>
+    body {
+        font-family: &#39;Noto Sans SC&#39;, sans-serif;
+    }
+    .break-inside-avoid {
+        break-inside: avoid;
+    }
+</style>
+<script src="./assets/static/uxbot/25_6/holder.js"></script></head>
+<body class="bg-gray-100">
+
+    <div id="app-container" class="max-w-sm mx-auto bg-white font-sans min-h-screen relative pb-28">
+
+        <!-- Header -->
+        <header class="sticky top-0 z-20 bg-gradient-to-br from-[#d2f9e4] via-[#e2f7ff] to-[#f4f7ff] px-4 pt-4 flex justify-between items-center">
+            <nav class="flex items-end space-x-5">
+                <a href="#" class="text-gray-500 pb-1.5">关注</a>
+                <div class="relative">
+                    <a href="#" class="text-black font-bold text-xl">发现</a>
+                    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-1 bg-green-400 rounded-full"></div>
+                </div>
+                <a href="#" class="text-gray-500 pb-1.5">热门岛屿</a>
+            </nav>
+            <button class="text-2xl text-gray-700">
+                <span class="iconify" data-icon="iconamoon:search-light" data-width="28" data-height="28"></span>
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main class="p-2">
+            <div class="columns-2 gap-2">
+                
+                <!-- Card 1 -->
+                <div class="break-inside-avoid mb-2 flex flex-col bg-white rounded-lg">
+                    <div class="relative">
+                        <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/12f9b6e5-be64-4e2f-a2dd-a076191b1712.png" alt="A scene from the animated film &#39;Little Voices&#39;, showing several stylized cartoon characters against a colorful backdrop. The main characters include a boy with a sombrero and a boy with spiky blond hair." style="width: 100%; height: 250px;" class="rounded-t-lg object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent rounded-t-lg"></div>
+                        <div class="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">豆瓣8.2</div>
+                        <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <span class="iconify" data-icon="ph:images-fill"></span>
+                            <span>+2</span>
+                        </div>
+                        <p class="absolute bottom-2 left-2 text-white text-xs leading-snug" style="text-shadow: 0 1px 2px rgba(0,0,0,0.7);">根据八至十三岁的儿童的访谈与绘画制作而成，<br>由幸存者的自白以及独特的动画手法，<br>传达在乱世状况以及承受无形的精神压力。</p>
+                    </div>
+                    <div class="p-3">
+                        <p class="font-semibold text-sm">高分影视推荐《小小心声》、《机器人总动员》</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center space-x-1.5">
+                                <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/9fbe41f3-ede9-426f-8a00-35a62956cc50.png" alt="User avatar with a colorful abstract pattern" style="width: 20px; height: 20px;" class="rounded-full">
+                                <span class="text-gray-500 text-xs">剧有引力</span>
+                            </div>
+                            <div class="flex items-center text-gray-500 space-x-1">
+                                <span class="iconify" data-icon="mdi:heart-outline"></span>
+                                <span class="text-xs">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="break-inside-avoid mb-2 flex flex-col bg-white rounded-lg overflow-hidden">
+                    <div class="relative">
+                        <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/6fd36e7c-14a4-4de3-b1ad-365875535de9.png" alt="A cartoon comic strip panel. A white duck character is holding a smartphone and says &#39;We split AA&#39;. Another corn character looks on. The text at the top says &#39;Dinner cost 88&#39;." style="width: 100%; height: auto;" class="block">
+                    </div>
+                    <div class="relative">
+                        <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/7fbf38a0-eb8c-4e8a-9eea-eb23cb8107af.png" alt="Second panel of a comic strip. The white duck character is still looking at its phone, and the corn character looks surprised. The duck says &#39;Then just transfer me 80&#39;." style="width: 100%; height: auto;" class="block">
+                        <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                             <span class="iconify" data-icon="ph:images-fill"></span>
+                            <span>+2</span>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="font-semibold text-sm">一种全新的AA制</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center space-x-1.5">
+                                <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/9fbe41f3-ede9-426f-8a00-35a62956cc50.png" alt="User avatar showing a close-up of a cat&#39;s face" style="width: 20px; height: 20px;" class="rounded-full object-cover">
+                                <span class="text-gray-500 text-xs">趣味生活</span>
+                            </div>
+                            <div class="flex items-center text-gray-500 space-x-1">
+                                <span class="iconify" data-icon="mdi:heart-outline"></span>
+                                <span class="text-xs">1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="break-inside-avoid mb-2 flex flex-col">
+                    <div class="bg-[#e8faff] p-4 rounded-lg relative">
+                        <span class="text-4xl text-gray-300 absolute top-2 left-3 font-serif">“</span>
+                        <p class="text-lg font-semibold pt-4">请大家推荐一个在家里也很容易坚持的运动🙏</p>
+                    </div>
+                    <div class="p-3 bg-white rounded-b-lg">
+                        <p class="text-sm truncate">姐妹们, 谁懂啊! ❤️ 每年都雄心壮志: 这次一...</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center space-x-1.5">
+                                <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/9fbe41f3-ede9-426f-8a00-35a62956cc50.png" alt="User avatar showing a person from the side, looking at a sunset." style="width: 20px; height: 20px;" class="rounded-full object-cover">
+                                <span class="text-gray-500 text-xs">爱运动的小九</span>
+                            </div>
+                            <div class="flex items-center text-gray-500 space-x-1">
+                                <span class="iconify" data-icon="mdi:heart-outline"></span>
+                                <span class="text-xs">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="break-inside-avoid mb-2 flex flex-col bg-white rounded-lg">
+                    <div class="relative">
+                        <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/3077a31e-4261-4ad3-afa1-70cb5abdd9ae.png" alt="A scene from the animated show Rick and Morty. Morty is in the foreground with a worried expression. In the background, other characters from the series are visible." style="width: 100%; height: 230px;" class="rounded-t-lg object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-t-lg"></div>
+                        <div class="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">豆瓣9.7</div>
+                        <div class="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                            <span class="iconify" data-icon="ph:images-fill"></span>
+                            <span>+2</span>
+                        </div>
+                        <div class="absolute bottom-2 left-2 text-white text-xs leading-snug" style="text-shadow: 0 1px 2px rgba(0,0,0,0.7);">
+                            <p>《瑞克和莫蒂》</p>
+                            <p>天才瑞克带着智商堪忧的孙子各个维度冒险的故事。</p>
+                            <p>对家人要关心的外公,无时无刻不流露出对家人的爱。</p>
+                            <p>天马行空想象力,搞笑的连续动画</p>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <p class="font-semibold text-sm">高分影视推荐</p>
+                        <div class="flex justify-between items-center mt-2">
+                            <div class="flex items-center space-x-1.5">
+                                <img src="https://spark-builder.s3.cn-north-1.amazonaws.com.cn/image/2025/12/17/9fbe41f3-ede9-426f-8a00-35a62956cc50.png" alt="User avatar with a colorful abstract pattern" style="width: 20px; height: 20px;" class="rounded-full">
+                                <span class="text-gray-500 text-xs">剧有引力</span>
+                            </div>
+                            <div class="flex items-center text-gray-500 space-x-1">
+                                <span class="iconify" data-icon="mdi:heart-outline"></span>
+                                <span class="text-xs">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="break-inside-avoid mb-2 p-3 bg-white rounded-lg">
+                    <p class="font-semibold">怎么办?我好焦虑</p>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="break-inside-avoid mb-2 p-3 bg-white rounded-lg">
+                    <p class="font-semibold">不要觉得自己没用</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Floating Footer -->
+        <footer class="absolute bottom-0 left-0 right-0 h-24">
+            <div class="relative w-full h-full flex justify-center items-center">
+                <!-- White Pill Background -->
+                <div class="absolute bottom-5 w-[92%] h-14 bg-white rounded-full shadow-lg flex justify-between items-center px-6">
+                    <!-- Left Icons -->
+                    <div class="flex items-center" style="gap: 2.75rem;">
+                        <a href="#" class="flex flex-col items-center text-cyan-500">
+                             <span class="iconify text-2xl" data-icon="fluent:home-24-filled"></span>
+                            <span class="text-xs font-semibold">首页</span>
+                        </a>
+                        <a href="#" class="flex flex-col items-center text-gray-500">
+                            <span class="iconify text-2xl" data-icon="ph:planet-light"></span>
+                            <span class="text-xs">岛屿</span>
+                        </a>
+                    </div>
+                    <!-- Right Icons -->
+                    <div class="flex items-center" style="gap: 2.75rem;">
+                        <a href="#" class="flex flex-col items-center text-gray-500">
+                            <span class="iconify text-2xl" data-icon="mingcute:chat-4-line"></span>
+                            <span class="text-xs">通知</span>
+                        </a>
+                        <a href="#" class="flex flex-col items-center text-gray-500">
+                            <span class="iconify text-2xl" data-icon="iconamoon:profile-circle-thin"></span>
+                            <span class="text-xs">我的</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- Plus Button -->
+                <button class="absolute bottom-8 w-16 h-16 bg-[#2c2c2c] rounded-full shadow-lg flex items-center justify-center text-white z-10">
+                    <span class="iconify text-4xl" data-icon="material-symbols:add"></span>
+                </button>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+    // No JS needed for this static layout
+</script>
+
+<script>
+    const originalBack = window.history.back
+    const originalForward = window.history.forward
+    const originalGo = window.history.go
+    function isValidNavigation(){
+      if(!window.parent.history.state.back || !window.parent.history.state.back.startsWith(&#39;/designPage&#39;)){
+        return false
+      }
+      return true
+    }
+    window.history.back = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalBack.apply(this, args);
+    };
+
+    window.history.forward = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalForward.apply(this, args);
+    };
+
+    window.history.go = function(...args) {
+      if(!isValidNavigation()){
+        return
+      }
+      return originalGo.apply(this, args);
+    };
+  </script></body></html>'></iframe>
+                    </div>
+                  </div>
+
+                </body>
+                </html>
+            
