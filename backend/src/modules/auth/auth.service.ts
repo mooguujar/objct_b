@@ -30,10 +30,19 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.id };
+    // 将 BigInt 转换为字符串，避免序列化问题
+    const userId = typeof user.id === 'bigint' ? user.id.toString() : user.id;
+    const payload = { username: user.username, sub: userId };
+    
+    // 处理 user 对象中的 BigInt 字段
+    const userResponse = {
+      ...user,
+      id: userId,
+    };
+    
     return {
       access_token: this.jwtService.sign(payload),
-      user,
+      user: userResponse,
     };
   }
 
