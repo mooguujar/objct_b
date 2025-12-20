@@ -1,4 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -87,8 +88,8 @@ export class CoinService {
       throw new BadRequestException('用户不存在');
     }
 
-    const currentBalance = user.coinBalance || 0;
-    const newBalance = currentBalance + amount;
+    const currentBalance = user.coinBalance || new Prisma.Decimal(0);
+    const newBalance = new Prisma.Decimal(currentBalance.toNumber() + amount);
 
     // 创建交易记录
     const transaction = await this.prisma.coinTransaction.create({
@@ -141,13 +142,13 @@ export class CoinService {
       throw new BadRequestException('用户不存在');
     }
 
-    const currentBalance = user.coinBalance || 0;
+    const currentBalance = user.coinBalance || new Prisma.Decimal(0);
 
-    if (currentBalance < amount) {
+    if (currentBalance.toNumber() < amount) {
       throw new BadRequestException('金币余额不足');
     }
 
-    const newBalance = currentBalance - amount;
+    const newBalance = new Prisma.Decimal(currentBalance.toNumber() - amount);
 
     // 创建交易记录
     await this.prisma.coinTransaction.create({
@@ -194,8 +195,8 @@ export class CoinService {
       throw new BadRequestException('用户不存在');
     }
 
-    const currentBalance = user.coinBalance || 0;
-    const newBalance = currentBalance + amount;
+    const currentBalance = user.coinBalance || new Prisma.Decimal(0);
+    const newBalance = new Prisma.Decimal(currentBalance.toNumber() + amount);
 
     // 创建交易记录
     await this.prisma.coinTransaction.create({
@@ -242,8 +243,8 @@ export class CoinService {
       throw new BadRequestException('用户不存在');
     }
 
-    const currentBalance = user.coinBalance || 0;
-    const newBalance = currentBalance + amount;
+    const currentBalance = user.coinBalance || new Prisma.Decimal(0);
+    const newBalance = new Prisma.Decimal(currentBalance.toNumber() + amount);
 
     // 创建交易记录
     await this.prisma.coinTransaction.create({

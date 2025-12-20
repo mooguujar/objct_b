@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
   UseGuards,
   Request,
   Param,
@@ -87,10 +89,10 @@ export class UserController {
   @Get('followings')
   @UseGuards(JwtAuthGuard)
   async getFollowings(
+    @Request() req: any,
     @Query('userId') userId?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @Request() req: any,
   ) {
     const currentUserId = BigInt(req.user.id);
     const targetUserId = userId ? BigInt(userId) : currentUserId;
@@ -109,10 +111,10 @@ export class UserController {
   @Get('followers')
   @UseGuards(JwtAuthGuard)
   async getFollowers(
+    @Request() req: any,
     @Query('userId') userId?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @Request() req: any,
   ) {
     const currentUserId = BigInt(req.user.id);
     const targetUserId = userId ? BigInt(userId) : currentUserId;

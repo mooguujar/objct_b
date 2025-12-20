@@ -70,6 +70,8 @@ export class ContentService {
         mediaUrls: true,
         likeCount: true,
         commentCount: true,
+        collectCount: true,
+        viewCount: true,
         createdAt: true,
         user: {
           select: {
@@ -164,7 +166,7 @@ export class ContentService {
     // 查询关注用户的帖子
     const where = {
       userId: { in: followingIds },
-      status: 'active',
+      status: 'active' as const,
     };
 
     const total = await this.prisma.post.count({ where });
@@ -408,7 +410,7 @@ export class ContentService {
       data: {
         title: data.title !== undefined ? data.title : post.title,
         content: data.content !== undefined ? data.content : post.content,
-        mediaUrls: data.mediaUrls !== undefined ? data.mediaUrls : post.mediaUrls,
+        mediaUrls: data.mediaUrls !== undefined ? data.mediaUrls : (post.mediaUrls as any),
       },
     });
 

@@ -18,10 +18,10 @@ export class NotificationController {
 
   @Get()
   async getNotifications(
+    @Request() req: any,
     @Query('type') type?: string,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @Request() req: any,
   ) {
     const userId = BigInt(req.user.id);
     return this.notificationService.getNotifications(
@@ -60,8 +60,8 @@ export class NotificationController {
 
   @Delete()
   async clearNotifications(
-    @Query('type') type?: string,
     @Request() req: any,
+    @Query('type') type?: string,
   ) {
     const userId = BigInt(req.user.id);
     return this.notificationService.clearNotifications(userId, type);

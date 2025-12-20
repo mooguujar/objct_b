@@ -25,10 +25,10 @@ export class IslandController {
   @Get('my')
   @UseGuards(JwtAuthGuard)
   async getMyIslands(
+    @Request() req: any,
     @Query('filter') filter?: 'joined' | 'created',
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @Request() req: any,
   ) {
     const userId = BigInt(req.user.id);
     return this.islandService.getMyIslands(

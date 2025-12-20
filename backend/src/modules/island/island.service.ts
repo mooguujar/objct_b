@@ -179,7 +179,7 @@ export class IslandService {
 
     const where = {
       islandId,
-      status: 'active',
+      status: 'active' as const,
     };
 
     const total = await this.prisma.post.count({ where });
@@ -273,7 +273,7 @@ export class IslandService {
     }
 
     // 如果是付费岛屿，需要扣除金币
-    if (island.price > 0) {
+    if (island.price.toNumber() > 0) {
       try {
         // 扣除金币
         await this.coinService.consume(
@@ -298,7 +298,7 @@ export class IslandService {
       data: {
         userId,
         islandId,
-        joinType: island.price > 0 ? 'paid' : 'free',
+        joinType: island.price.toNumber() > 0 ? 'paid' : 'free',
       },
     });
 

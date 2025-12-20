@@ -44,9 +44,9 @@ export class ContentController {
   @Get('following')
   @UseGuards(JwtAuthGuard)
   async getFollowingPosts(
+    @Request() req: any,
     @Query('page') page?: string,
     @Query('pageSize') pageSize?: string,
-    @Request() req: any,
   ) {
     const userId = BigInt(req.user.id);
 
