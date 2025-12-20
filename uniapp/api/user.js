@@ -15,5 +15,15 @@ export const userApi = {
   getUserPosts(userId, params) {
     return request.get(`/user/${userId}/posts`, { params })
   },
+
+  // 关注用户
+  followUser(userId) {
+    return request.post(`/user/follow/${userId}`)
+  },
+
+  // 取消关注
+  unfollowUser(userId) {
+    return request.delete(`/user/follow/${userId}`)
+  },
 }
 

@@ -13,6 +13,12 @@ export const useUserApi = () => {
       api.get(`/user/${userId}/posts`, {
         params,
       }),
+
+    // 关注用户
+    followUser: (id: string | number | bigint) => api.post(`/user/follow/${id}`),
+
+    // 取消关注
+    unfollowUser: (id: string | number | bigint) => api.delete(`/user/follow/${id}`),
   }
 }
 

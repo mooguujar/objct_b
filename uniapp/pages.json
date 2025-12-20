@@ -50,6 +50,13 @@
         "navigationBarTitleText": "发布",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pages/search/index",
+      "style": {
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "globalStyle": {
