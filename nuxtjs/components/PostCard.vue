@@ -5,6 +5,7 @@
       <img
         v-if="post.mediaType === 'image'"
         :src="post.mediaUrls[0]"
+        loading="lazy"
         class="media-image"
         alt=""
       />
@@ -32,6 +33,7 @@
       <div class="post-author">
         <img
           :src="post.user.avatar || '/default-avatar.png'"
+          loading="lazy"
           class="author-avatar"
           alt=""
         />

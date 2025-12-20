@@ -56,13 +56,21 @@ export class ContentService {
     // 查询总数
     const total = await this.prisma.post.count({ where });
 
-    // 查询列表
+    // 查询列表（优化：只查询必要字段）
     const posts = await this.prisma.post.findMany({
       where,
       skip,
       take,
       orderBy,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        mediaType: true,
+        mediaUrls: true,
+        likeCount: true,
+        commentCount: true,
+        createdAt: true,
         user: {
           select: {
             id: true,

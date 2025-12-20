@@ -5,6 +5,7 @@
       <image
         v-if="post.mediaType === 'image'"
         :src="post.mediaUrls[0]"
+        lazy-load
         mode="aspectFill"
         class="media-image"
         @error="handleImageError"
@@ -34,6 +35,7 @@
         <image
           :src="post.user.avatar || '/static/default-avatar.png'"
           class="author-avatar"
+          lazy-load
           mode="aspectFill"
         />
         <text class="author-name">{{ post.user.nickname }}</text>
@@ -51,11 +53,33 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
+
 interface Props {
   post: any
 }
 
 const props = defineProps<Props>()
+const shouldLoad = ref(false)
+
+onMounted(() => {
+  // 使用IntersectionObserver实现懒加载
+  const query = uni.createSelectorQuery().in(getCurrentInstance())
+  query.select('.post-card').boundingClientRect((data: any) => {
+    if (data) {
+      // 检查元素是否在视口内
+      const systemInfo = uni.getSystemInfoSync()
+      if (data.top < systemInfo.windowHeight * 1.5) {
+        shouldLoad.value = true
+      } else {
+        // 延迟加载
+        setTimeout(() => {
+          shouldLoad.value = true
+        }, 100)
+      }
+    }
+  }).exec()
+})
 
 const handleClick = () => {
   // TODO: 跳转到详情页

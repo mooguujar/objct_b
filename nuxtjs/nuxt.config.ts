@@ -28,11 +28,35 @@ export default defineNuxtConfig({
       meta: [
         { charset: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-        { name: 'description', content: '岛屿社交平台 - 发现有趣的内容和志同道合的朋友' }
+        { name: 'description', content: '岛屿社交平台 - 发现有趣的内容和志同道合的朋友' },
+        { name: 'keywords', content: '社交,岛屿,社区,内容分享' },
+        { property: 'og:title', content: '岛屿社交平台' },
+        { property: 'og:description', content: '发现有趣的内容和志同道合的朋友' },
+        { property: 'og:type', content: 'website' },
+        { name: 'twitter:card', content: 'summary_large_image' }
       ],
       link: [
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
       ]
+    }
+  },
+
+  // 性能优化配置
+  experimental: {
+    payloadExtraction: false // 减少SSR payload大小
+  },
+
+  // 图片优化
+  image: {
+    quality: 80,
+    format: ['webp', 'jpg']
+  },
+
+  // 构建优化
+  build: {
+    analyze: false,
+    optimization: {
+      treeShake: true
     }
   }
 })
