@@ -100,17 +100,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import PostCard from '@/components/PostCard.vue'
 import { userApi } from '@/api/user'
 import { useUserStore } from '@/store/user'
 
-const route = useRoute()
 const userStore = useUserStore()
 
-const userId = computed(() => route.params.id as string)
-
+const userId = ref<string>('')
 const userInfo = ref<any>({})
 const postList = ref<any[]>([])
 const loading = ref(false)
@@ -243,9 +241,13 @@ const loadMore = () => {
   }
 }
 
-onMounted(() => {
-  loadUserInfo()
-  loadUserPosts(1)
+// uniapp 使用 onLoad 获取路由参数
+onLoad((options: any) => {
+  userId.value = options.id || ''
+  if (userId.value) {
+    loadUserInfo()
+    loadUserPosts(1)
+  }
 })
 </script>
 

@@ -1,4 +1,5 @@
 import { useApi } from './useApi'
+import { useUserStore } from '~/store/user'
 
 export const useUploadApi = () => {
   const config = useRuntimeConfig()

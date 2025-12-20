@@ -1,3 +1,5 @@
+import { useUserStore } from '~/store/user'
+
 export const useApi = () => {
   const config = useRuntimeConfig()
 

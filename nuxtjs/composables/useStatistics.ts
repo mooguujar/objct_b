@@ -1,3 +1,5 @@
+import { useUserStore } from '~/store/user'
+
 export const useStatistics = () => {
   const config = useRuntimeConfig()
   const userStore = useUserStore()
@@ -5,12 +7,18 @@ export const useStatistics = () => {
   let pageViewQueue: any[] = []
   let clickEventQueue: any[] = []
   let timer: NodeJS.Timeout | null = null
-  let pageStartTime = Date.now()
+  let pageStartTime = 0
   let currentPagePath = ''
+  
+  // 客户端初始化时间
+  if (process.client) {
+    pageStartTime = Date.now()
+  }
 
   // 初始化统计
   const init = () => {
     if (process.client && !timer) {
+      pageStartTime = Date.now()
       timer = setInterval(() => {
         batchReport()
       }, 5000)
@@ -136,7 +144,7 @@ export const useStatistics = () => {
     pageViewQueue = []
 
     try {
-      await $fetch(`${config.public.apiBase}/statistics/page-view`, {
+      await $fetch(`${config.public.apiBase}/statistics/page-view/batch`, {
         method: 'POST',
         body: { pageViews: data },
       })
@@ -153,7 +161,7 @@ export const useStatistics = () => {
     clickEventQueue = []
 
     try {
-      await $fetch(`${config.public.apiBase}/statistics/click-event`, {
+      await $fetch(`${config.public.apiBase}/statistics/click-event/batch`, {
         method: 'POST',
         body: { clickEvents: data },
       })

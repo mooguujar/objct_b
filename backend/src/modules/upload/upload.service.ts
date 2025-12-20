@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as OSS from 'ali-oss';
+import OSS from 'ali-oss';
 import { ImageUtil } from '../../common/utils/image.util';
 
 @Injectable()

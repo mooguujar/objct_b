@@ -1,3 +1,5 @@
+import "./chunk-CSAU5B4Q.js";
+
 // E:/work/objct_b/uniapp/node_modules/uview-plus/libs/vue.js
 var defineMixin = (options) => {
   return options;

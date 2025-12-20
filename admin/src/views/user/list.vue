@@ -145,7 +145,7 @@ const handleBan = async (user: any) => {
   }
 }
 
-const handleUnban = async (user: any) {
+const handleUnban = async (user: any) => {
   try {
     await ElMessageBox.confirm('确定要解封该用户吗？', '提示', {
       type: 'warning',

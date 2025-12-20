@@ -19,7 +19,7 @@ export function initStatistics() {
 }
 
 // 上报页面访问
-export function reportPageView(pagePath, pageTitle = '') {
+export function reportPageView(pagePath, pageTitle = '', stayDuration = 0) {
   const userId = uni.getStorageSync('userId')
   const deviceId = uni.getStorageSync('deviceId')
   const platform = 'app'
@@ -31,8 +31,7 @@ export function reportPageView(pagePath, pageTitle = '') {
     deviceType: getDeviceType(),
     platform,
     referrer: getReferrer(),
-    ipAddress: null, // 客户端无法获取IP
-    userAgent: getUA(),
+    stayDuration,
     timestamp: Date.now(),
   }
   
@@ -45,7 +44,7 @@ export function reportPageView(pagePath, pageTitle = '') {
 }
 
 // 上报点击事件
-export function reportClickEvent(eventType, elementId = '', elementType = '', relatedId = null, relatedType = '') {
+export function reportClickEvent(eventType, elementId = '', elementType = '', relatedId = null, relatedType = '', clickX = null, clickY = null) {
   const userId = uni.getStorageSync('userId')
   const deviceId = uni.getStorageSync('deviceId')
   
@@ -55,11 +54,10 @@ export function reportClickEvent(eventType, elementId = '', elementType = '', re
     elementId,
     elementType,
     pagePath: getCurrentPagePath(),
-    clickPositionX: null, // 需要从事件对象中获取
-    clickPositionY: null,
+    clickPositionX: clickX,
+    clickPositionY: clickY,
     relatedId,
     relatedType,
-    ipAddress: null,
     timestamp: Date.now(),
   }
   
@@ -179,32 +177,8 @@ export function trackPageHide() {
   }
 }
 
-// 上报页面访问（带停留时长）
-export function reportPageView(pagePath, pageTitle = '', stayDuration = 0) {
-  const userId = uni.getStorageSync('userId')
-  const deviceId = uni.getStorageSync('deviceId')
-  const platform = 'app'
-  
-  const pageView = {
-    userId: userId || null,
-    pagePath,
-    pageTitle,
-    deviceType: getDeviceType(),
-    platform,
-    referrer: getReferrer(),
-    stayDuration,
-    timestamp: Date.now(),
-  }
-  
-  pageViewQueue.push(pageView)
-  
-  // 达到批量大小立即上报
-  if (pageViewQueue.length >= BATCH_SIZE) {
-    batchReportPageView()
-  }
-}
 
-// 重新导出原有的reportClickEvent，添加位置信息
+// 上报点击事件（带位置信息）
 export function reportClickEventWithPosition(eventType, elementId = '', elementType = '', relatedId = null, relatedType = '', event = null) {
   let clickX = null
   let clickY = null
@@ -219,33 +193,4 @@ export function reportClickEventWithPosition(eventType, elementId = '', elementT
   
   reportClickEvent(eventType, elementId, elementType, relatedId, relatedType, clickX, clickY)
 }
-
-// 修改原有的reportClickEvent，添加位置参数
-function reportClickEvent(eventType, elementId = '', elementType = '', relatedId = null, relatedType = '', clickX = null, clickY = null) {
-  const userId = uni.getStorageSync('userId')
-  const deviceId = uni.getStorageSync('deviceId')
-  
-  const clickEvent = {
-    userId: userId || null,
-    eventType,
-    elementId,
-    elementType,
-    pagePath: getCurrentPagePath(),
-    clickPositionX: clickX,
-    clickPositionY: clickY,
-    relatedId,
-    relatedType,
-    timestamp: Date.now(),
-  }
-  
-  clickEventQueue.push(clickEvent)
-  
-  // 达到批量大小立即上报
-  if (clickEventQueue.length >= BATCH_SIZE) {
-    batchReportClickEvent()
-  }
-}
-
-// 导出原始的reportClickEvent（保持兼容）
-export { reportClickEvent }
 

@@ -24,6 +24,15 @@ export class ReportPageViewDto {
   @IsNumber()
   @IsOptional()
   stayDuration?: number
+
+  // 允许客户端发送，但服务器端会重新设置
+  @IsString()
+  @IsOptional()
+  userId?: string
+
+  @IsNumber()
+  @IsOptional()
+  timestamp?: number
 }
 
 export class BatchReportPageViewDto {
