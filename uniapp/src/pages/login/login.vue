@@ -36,7 +36,7 @@ const form = ref({
 const handleLogin = async () => {
   try {
     await userStore.login(form.value.username, form.value.password);
-    uni.switchTab({
+    uni.reLaunch({
       url: '/pages/index/index',
     });
   } catch (error) {

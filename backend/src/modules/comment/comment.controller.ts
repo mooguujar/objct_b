@@ -18,11 +18,11 @@ export class CommentController {
   async create(
     @Body('postId', ParseIntPipe) postId: number,
     @Body('content') content: string,
-    @Body('parentId') parentId?: number,
+    @Body('parentId', new ParseIntPipe({ optional: true })) parentId?: number,
   ) {
     // TODO: 从JWT获取userId
     const userId = BigInt(1);
-    return this.commentService.create(userId, BigInt(postId), content, parentId);
+    return this.commentService.create(userId, BigInt(postId), content, parentId ? BigInt(parentId) : undefined);
   }
 }
 

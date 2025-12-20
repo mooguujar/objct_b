@@ -8,7 +8,7 @@ export class ContentService {
   async findAll(page = 1, pageSize = 20, filters?: any) {
     const skip = (page - 1) * pageSize;
     const where: any = {
-      status: 'active',
+      status: 'active' as const,
     };
 
     if (filters?.category) {
@@ -70,7 +70,7 @@ export class ContentService {
 
     const where = {
       userId: { in: followingIds },
-      status: 'active',
+      status: 'active' as const,
     };
 
     const [list, total] = await Promise.all([

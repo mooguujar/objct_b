@@ -346,7 +346,7 @@ model UserBehavior {
 
 model CreatorApplication {
   id              BigInt                    @id @default(autoincrement()) @db.UnsignedBigInt
-  userId          BigInt                     @map("user_id") @db.UnsignedBigInt
+  userId          BigInt                     @unique @map("user_id") @db.UnsignedBigInt
   realName        String?                    @map("real_name") @db.VarChar(50)
   idCard          String?                    @map("id_card") @db.VarChar(50)
   phone           String?                    @db.VarChar(20)

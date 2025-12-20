@@ -8,7 +8,7 @@ export class SearchService {
   async searchPosts(keyword: string, page = 1, pageSize = 20) {
     const skip = (page - 1) * pageSize;
     const where = {
-      status: 'active',
+      status: 'active' as const,
       OR: [
         { title: { contains: keyword } },
         { content: { contains: keyword } },
@@ -48,7 +48,7 @@ export class SearchService {
   async searchUsers(keyword: string, page = 1, pageSize = 20) {
     const skip = (page - 1) * pageSize;
     const where = {
-      status: 'active',
+      status: 'active' as const,
       OR: [
         { username: { contains: keyword } },
         { nickname: { contains: keyword } },
@@ -85,7 +85,7 @@ export class SearchService {
   async searchIslands(keyword: string, page = 1, pageSize = 20) {
     const skip = (page - 1) * pageSize;
     const where = {
-      status: 'active',
+      status: 'active' as const,
       OR: [
         { name: { contains: keyword } },
         { description: { contains: keyword } },

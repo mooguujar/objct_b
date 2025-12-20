@@ -61,7 +61,7 @@ export class CommentService {
         userId,
         postId,
         content,
-        parentId: parentId ? BigInt(parentId) : null,
+        parentId: parentId || null,
       },
       include: {
         user: {

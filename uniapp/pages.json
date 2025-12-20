@@ -9,6 +9,12 @@
         "navigationBarTitleText": "首页",
         "navigationBarBackgroundColor": "#67FFD1"
       }
+    },
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录"
+      }
     }
   ],
   "globalStyle": {
@@ -16,18 +22,6 @@
     "navigationBarTitleText": "岛屿社交",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
-  },
-  "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#67FFD1",
-    "borderStyle": "black",
-    "backgroundColor": "#ffffff",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页"
-      }
-    ]
   }
 }
 
