@@ -1,3 +1,5 @@
+import request from './request';
+
 interface PageViewData {
   pagePath: string;
   pageTitle?: string;
@@ -26,7 +28,13 @@ class Statistics {
   private timer: any = null;
 
   constructor() {
-    this.startBatchUpload();
+    // 延迟启动批量上传，避免在编译时执行
+    // 使用 nextTick 确保在运行时才执行
+    if (typeof window !== 'undefined' && typeof uni !== 'undefined') {
+      setTimeout(() => {
+        this.startBatchUpload();
+      }, 0);
+    }
   }
 
   // 上报页面访问
@@ -60,7 +68,6 @@ class Statistics {
     this.clickEventCache = [];
 
     try {
-      const request = (await import('./request')).default;
       await request.post('/statistics/batch', data);
     } catch (error) {
       // 失败后重新加入缓存

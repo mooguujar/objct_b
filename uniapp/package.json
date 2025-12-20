@@ -4,10 +4,10 @@
   "description": "岛屿社交平台 UniApp APP端",
   "main": "main.js",
   "scripts": {
-    "dev:h5": "uni -p h5",
-    "dev:mp-weixin": "uni -p mp-weixin",
-    "build:h5": "uni build -p h5",
-    "build:mp-weixin": "uni build -p mp-weixin"
+    "dev:h5": "vite --mode development",
+    "dev:mp-weixin": "vite --mode mp-weixin",
+    "build:h5": "vite build --mode production",
+    "build:mp-weixin": "vite build --mode mp-weixin"
   },
   "dependencies": {
     "@dcloudio/uni-app": "3.0.0-4080720251210001",

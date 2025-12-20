@@ -2,18 +2,18 @@
   <view class="login-container">
     <view class="login-form">
       <text class="title">登录</text>
-      <u-input
+      <input
         v-model="form.username"
         placeholder="请输入用户名/手机号/邮箱"
-        border="surround"
+        class="input"
       />
-      <u-input
+      <input
         v-model="form.password"
         type="password"
         placeholder="请输入密码"
-        border="surround"
+        class="input"
       />
-      <u-button type="primary" @click="handleLogin">登录</u-button>
+      <button type="primary" @click="handleLogin" class="btn">登录</button>
       <view class="links">
         <text @click="goToRegister">注册账号</text>
         <text @click="goToForget">忘记密码</text>
@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useUserStore } from '../../store/user';
+import { useUserStore } from '@/store/user';
 
 const userStore = useUserStore();
 
@@ -68,6 +68,24 @@ const goToForget = () => {
     font-weight: bold;
     margin-bottom: 40px;
     display: block;
+  }
+  
+  .input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 12px;
+    background-color: #67FFD1;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
   }
 }
 

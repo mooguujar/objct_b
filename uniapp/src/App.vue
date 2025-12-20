@@ -1,6 +1,6 @@
 <template>
   <view id="app">
-    <router-view />
+    <!-- uniapp 会自动根据 pages.json 渲染页面 -->
   </view>
 </template>
 
