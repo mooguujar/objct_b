@@ -12,7 +12,7 @@ async function main() {
   // await prisma.post.deleteMany({})
 
   // 生成用户数据
-  const users = []
+  const users: any[] = []
   const passwordHash = await bcrypt.hash('123456', 10)
 
   // 普通用户（10个）
@@ -35,7 +35,7 @@ async function main() {
   }
 
   // 创作者用户（5个）
-  const creators = []
+  const creators: any[] = []
   for (let i = 1; i <= 5; i++) {
     const user = await prisma.user.create({
       data: {
@@ -51,8 +51,6 @@ async function main() {
         creatorApplication: {
           create: {
             status: 'approved',
-            platforms: ['weibo', 'douyin'],
-            reason: '优质创作者',
           },
         },
       },
@@ -63,11 +61,11 @@ async function main() {
   }
 
   // 岛屿创建者（3个，从创作者中选择）
-  const islandOwners = creators.slice(0, 3)
+  const islandOwners: any[] = creators.slice(0, 3)
 
   // 生成岛屿数据（10个，不同分类）
   const categories = ['财经', '体育', '颜值', '游戏', '美食', '旅行', '科技', '音乐', '电影', '读书']
-  const islands = []
+  const islands: any[] = []
 
   for (let i = 0; i < 10; i++) {
     const owner = islandOwners[i % islandOwners.length]
@@ -121,7 +119,7 @@ async function main() {
   console.log('创建关注关系: 50条')
 
   // 生成帖子数据（50条）
-  const posts = []
+  const posts: any[] = []
   const mediaTypes = ['text', 'image', 'video', 'mixed']
   
   for (let i = 0; i < 50; i++) {
@@ -159,8 +157,8 @@ async function main() {
   console.log('创建帖子: 50条')
 
   // 生成岛屿帖子（100条）
-  const islandPosts = []
-  for (let i = 0; i < 100; i++) {
+  const islandPosts: any[] = []
+  for (let i = 0; i < 50; i++) {
     const island = islands[Math.floor(Math.random() * islands.length)]
     const author = users[Math.floor(Math.random() * users.length)]
     const mediaType = mediaTypes[Math.floor(Math.random() * mediaTypes.length)]
@@ -199,9 +197,9 @@ async function main() {
   }
   console.log('创建岛屿帖子: 100条')
 
-  // 生成评论数据（200条）
+  // 生成评论数据（100条）
   const allPosts = [...posts, ...islandPosts]
-  for (let i = 0; i < 200; i++) {
+  for (let i = 0; i < 100; i++) {
     const post = allPosts[Math.floor(Math.random() * allPosts.length)]
     const author = users[Math.floor(Math.random() * users.length)]
     
@@ -220,10 +218,11 @@ async function main() {
       data: { commentCount: { increment: 1 } },
     })
   }
-  console.log('创建评论: 200条')
+  console.log('创建评论: 100条')
 
-  // 生成点赞数据（500条）
-  for (let i = 0; i < 500; i++) {
+  // 生成点赞数据（100条）
+  console.log('开始生成点赞数据...')
+  for (let i = 0; i < 100; i++) {
     const post = allPosts[Math.floor(Math.random() * allPosts.length)]
     const user = users[Math.floor(Math.random() * users.length)]
     
@@ -256,7 +255,7 @@ async function main() {
       // 忽略重复点赞
     }
   }
-  console.log('创建点赞: 500条')
+  console.log('创建点赞: 100条')
 
   // 生成岛屿成员关系（部分用户加入岛屿）
   for (let i = 0; i < 30; i++) {
