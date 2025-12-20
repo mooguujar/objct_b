@@ -10,6 +10,8 @@ import { IslandModule } from './modules/island/island.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { UserModule } from './modules/user/user.module';
 import { CreatorModule } from './modules/creator/creator.module';
+import { CommentModule } from './modules/comment/comment.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { CreatorModule } from './modules/creator/creator.module';
     NotificationModule,
     UserModule,
     CreatorModule,
+    CommentModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

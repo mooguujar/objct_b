@@ -57,5 +57,75 @@ export class UserController {
       data: result,
     };
   }
+
+  @Post('follow/:id')
+  @UseGuards(JwtAuthGuard)
+  async followUser(@Param('id') id: string, @Request() req: any) {
+    const followerId = BigInt(req.user.id);
+    const followingId = BigInt(id);
+    const result = await this.userService.followUser(followerId, followingId);
+    return {
+      code: 200,
+      message: '关注成功',
+      data: result,
+    };
+  }
+
+  @Delete('follow/:id')
+  @UseGuards(JwtAuthGuard)
+  async unfollowUser(@Param('id') id: string, @Request() req: any) {
+    const followerId = BigInt(req.user.id);
+    const followingId = BigInt(id);
+    const result = await this.userService.unfollowUser(followerId, followingId);
+    return {
+      code: 200,
+      message: '取消关注成功',
+      data: result,
+    };
+  }
+
+  @Get('followings')
+  @UseGuards(JwtAuthGuard)
+  async getFollowings(
+    @Query('userId') userId?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Request() req: any,
+  ) {
+    const currentUserId = BigInt(req.user.id);
+    const targetUserId = userId ? BigInt(userId) : currentUserId;
+    const result = await this.userService.getFollowings(targetUserId, {
+      page: page ? parseInt(page) : 1,
+      pageSize: pageSize ? parseInt(pageSize) : 20,
+      currentUserId,
+    });
+    return {
+      code: 200,
+      message: 'success',
+      data: result,
+    };
+  }
+
+  @Get('followers')
+  @UseGuards(JwtAuthGuard)
+  async getFollowers(
+    @Query('userId') userId?: string,
+    @Query('page') page?: string,
+    @Query('pageSize') pageSize?: string,
+    @Request() req: any,
+  ) {
+    const currentUserId = BigInt(req.user.id);
+    const targetUserId = userId ? BigInt(userId) : currentUserId;
+    const result = await this.userService.getFollowers(targetUserId, {
+      page: page ? parseInt(page) : 1,
+      pageSize: pageSize ? parseInt(pageSize) : 20,
+      currentUserId,
+    });
+    return {
+      code: 200,
+      message: 'success',
+      data: result,
+    };
+  }
 }
 

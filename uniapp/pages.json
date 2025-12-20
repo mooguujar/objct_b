@@ -43,6 +43,13 @@
       "style": {
         "navigationStyle": "custom"
       }
+    },
+    {
+      "path": "pages/publish/index",
+      "style": {
+        "navigationBarTitleText": "发布",
+        "enablePullDownRefresh": false
+      }
     }
   ],
   "globalStyle": {

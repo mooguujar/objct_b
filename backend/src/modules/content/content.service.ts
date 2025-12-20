@@ -322,5 +322,345 @@ export class ContentService {
       updatedAt: post.updatedAt,
     };
   }
+
+  // 发布内容
+  async createPost(userId: bigint, data: {
+    islandId?: bigint;
+    title?: string;
+    content?: string;
+    mediaType: string;
+    mediaUrls?: string[];
+  }) {
+    // 如果指定了岛屿，验证岛屿是否存在
+    if (data.islandId) {
+      const island = await this.prisma.island.findUnique({
+        where: { id: data.islandId },
+      });
+      if (!island || island.status !== 'active') {
+        throw new NotFoundException('岛屿不存在或已关闭');
+      }
+    }
+
+    // 创建帖子
+    const post = await this.prisma.post.create({
+      data: {
+        userId,
+        islandId: data.islandId || null,
+        title: data.title || null,
+        content: data.content || null,
+        mediaType: data.mediaType as any,
+        mediaUrls: data.mediaUrls || [],
+      },
+    });
+
+    // 更新用户帖子数
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { postCount: { increment: 1 } },
+    });
+
+    // 如果是指定岛屿的帖子，更新岛屿帖子数
+    if (data.islandId) {
+      await this.prisma.island.update({
+        where: { id: data.islandId },
+        data: { postCount: { increment: 1 } },
+      });
+    }
+
+    return {
+      id: post.id.toString(),
+      title: post.title,
+      content: post.content,
+      createdAt: post.createdAt,
+    };
+  }
+
+  // 更新内容
+  async updatePost(postId: bigint, userId: bigint, data: {
+    title?: string;
+    content?: string;
+    mediaUrls?: string[];
+  }) {
+    // 验证帖子是否存在且属于当前用户
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException('帖子不存在');
+    }
+
+    if (post.userId !== userId) {
+      throw new NotFoundException('无权修改该帖子');
+    }
+
+    // 更新帖子
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: {
+        title: data.title !== undefined ? data.title : post.title,
+        content: data.content !== undefined ? data.content : post.content,
+        mediaUrls: data.mediaUrls !== undefined ? data.mediaUrls : post.mediaUrls,
+      },
+    });
+
+    return {
+      id: updated.id.toString(),
+      updatedAt: updated.updatedAt,
+    };
+  }
+
+  // 删除内容
+  async deletePost(postId: bigint, userId: bigint) {
+    // 验证帖子是否存在且属于当前用户
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post) {
+      throw new NotFoundException('帖子不存在');
+    }
+
+    if (post.userId !== userId) {
+      throw new NotFoundException('无权删除该帖子');
+    }
+
+    // 软删除：更新状态为deleted
+    await this.prisma.post.update({
+      where: { id: postId },
+      data: { status: 'deleted' },
+    });
+
+    // 更新用户帖子数
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { postCount: { decrement: 1 } },
+    });
+
+    // 如果是岛屿帖子，更新岛屿帖子数
+    if (post.islandId) {
+      await this.prisma.island.update({
+        where: { id: post.islandId },
+        data: { postCount: { decrement: 1 } },
+      });
+    }
+  }
+
+  // 点赞帖子
+  async likePost(postId: bigint, userId: bigint) {
+    // 检查帖子是否存在
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post || post.status !== 'active') {
+      throw new NotFoundException('帖子不存在');
+    }
+
+    // 检查是否已点赞
+    const existing = await this.prisma.postLike.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (existing) {
+      // 已点赞，返回当前状态
+      const updatedPost = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: { likeCount: true },
+      });
+      return {
+        isLiked: true,
+        likeCount: updatedPost?.likeCount || post.likeCount,
+      };
+    }
+
+    // 创建点赞记录
+    await this.prisma.postLike.create({
+      data: {
+        userId,
+        postId,
+      },
+    });
+
+    // 更新帖子点赞数
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: { likeCount: { increment: 1 } },
+    });
+
+    // 更新用户获赞数
+    await this.prisma.user.update({
+      where: { id: post.userId },
+      data: { likeCount: { increment: 1 } },
+    });
+
+    return {
+      isLiked: true,
+      likeCount: updated.likeCount,
+    };
+  }
+
+  // 取消点赞
+  async unlikePost(postId: bigint, userId: bigint) {
+    // 检查是否已点赞
+    const existing = await this.prisma.postLike.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (!existing) {
+      // 未点赞，返回当前状态
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: { likeCount: true },
+      });
+      return {
+        isLiked: false,
+        likeCount: post?.likeCount || 0,
+      };
+    }
+
+    // 删除点赞记录
+    await this.prisma.postLike.delete({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    // 更新帖子点赞数
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: { likeCount: { decrement: 1 } },
+    });
+
+    // 获取帖子信息以更新用户获赞数
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+      select: { userId: true, likeCount: true },
+    });
+
+    if (post && post.likeCount > 0) {
+      await this.prisma.user.update({
+        where: { id: post.userId },
+        data: { likeCount: { decrement: 1 } },
+      });
+    }
+
+    return {
+      isLiked: false,
+      likeCount: updated.likeCount,
+    };
+  }
+
+  // 收藏帖子
+  async collectPost(postId: bigint, userId: bigint) {
+    // 检查帖子是否存在
+    const post = await this.prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!post || post.status !== 'active') {
+      throw new NotFoundException('帖子不存在');
+    }
+
+    // 检查是否已收藏
+    const existing = await this.prisma.postCollect.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (existing) {
+      // 已收藏，返回当前状态
+      const updatedPost = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: { collectCount: true },
+      });
+      return {
+        isCollected: true,
+        collectCount: updatedPost?.collectCount || post.collectCount,
+      };
+    }
+
+    // 创建收藏记录
+    await this.prisma.postCollect.create({
+      data: {
+        userId,
+        postId,
+      },
+    });
+
+    // 更新帖子收藏数
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: { collectCount: { increment: 1 } },
+    });
+
+    return {
+      isCollected: true,
+      collectCount: updated.collectCount,
+    };
+  }
+
+  // 取消收藏
+  async uncollectPost(postId: bigint, userId: bigint) {
+    // 检查是否已收藏
+    const existing = await this.prisma.postCollect.findUnique({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    if (!existing) {
+      // 未收藏，返回当前状态
+      const post = await this.prisma.post.findUnique({
+        where: { id: postId },
+        select: { collectCount: true },
+      });
+      return {
+        isCollected: false,
+        collectCount: post?.collectCount || 0,
+      };
+    }
+
+    // 删除收藏记录
+    await this.prisma.postCollect.delete({
+      where: {
+        userId_postId: {
+          userId,
+          postId,
+        },
+      },
+    });
+
+    // 更新帖子收藏数
+    const updated = await this.prisma.post.update({
+      where: { id: postId },
+      data: { collectCount: { decrement: 1 } },
+    });
+
+    return {
+      isCollected: false,
+      collectCount: updated.collectCount,
+    };
+  }
 }
 
