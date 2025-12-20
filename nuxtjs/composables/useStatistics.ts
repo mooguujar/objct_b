@@ -5,6 +5,8 @@ export const useStatistics = () => {
   let pageViewQueue: any[] = []
   let clickEventQueue: any[] = []
   let timer: NodeJS.Timeout | null = null
+  let pageStartTime = Date.now()
+  let currentPagePath = ''
 
   // 初始化统计
   const init = () => {
@@ -12,21 +14,50 @@ export const useStatistics = () => {
       timer = setInterval(() => {
         batchReport()
       }, 5000)
+      
+      // 页面隐藏时记录停留时长
+      window.addEventListener('beforeunload', () => {
+        trackPageHide()
+      })
+    }
+  }
+
+  // 跟踪页面访问（带停留时长）
+  const trackPageView = (pagePath: string, pageTitle = '') => {
+    if (!process.client) return
+
+    // 记录离开上一个页面的时长
+    if (currentPagePath && currentPagePath !== pagePath) {
+      const stayDuration = Math.floor((Date.now() - pageStartTime) / 1000)
+      reportPageView(currentPagePath, '', stayDuration)
+    }
+
+    // 记录新页面
+    currentPagePath = pagePath
+    pageStartTime = Date.now()
+    reportPageView(pagePath, pageTitle)
+  }
+
+  // 页面隐藏时记录停留时长
+  const trackPageHide = () => {
+    if (currentPagePath) {
+      const stayDuration = Math.floor((Date.now() - pageStartTime) / 1000)
+      reportPageView(currentPagePath, '', stayDuration)
     }
   }
 
   // 上报页面访问
-  const reportPageView = (pagePath: string, pageTitle = '') => {
+  const reportPageView = (pagePath: string, pageTitle = '', stayDuration = 0) => {
     if (!process.client) return
 
     const pageView = {
-      userId: userStore.userId || null,
+      userId: userStore.user?.id?.toString() || null,
       pagePath,
       pageTitle,
       deviceType: 'web',
       platform: 'web',
       referrer: document.referrer || '',
-      userAgent: navigator.userAgent,
+      stayDuration,
       timestamp: Date.now(),
     }
 
@@ -43,19 +74,22 @@ export const useStatistics = () => {
     elementId = '',
     elementType = '',
     relatedId: number | null = null,
-    relatedType = ''
+    relatedType = '',
+    clickX: number | null = null,
+    clickY: number | null = null
   ) => {
     if (!process.client) return
 
     const clickEvent = {
-      userId: userStore.userId || null,
+      userId: userStore.user?.id?.toString() || null,
       eventType,
       elementId,
       elementType,
       pagePath: window.location.pathname,
+      clickPositionX: clickX,
+      clickPositionY: clickY,
       relatedId,
       relatedType,
-      userAgent: navigator.userAgent,
       timestamp: Date.now(),
     }
 
@@ -66,6 +100,34 @@ export const useStatistics = () => {
     }
   }
 
+  // 上报点击事件（带位置信息）
+  const reportClickEventWithPosition = (
+    eventType: string,
+    elementId = '',
+    elementType = '',
+    relatedId: number | null = null,
+    relatedType = '',
+    event: MouseEvent | TouchEvent | null = null
+  ) => {
+    let clickX: number | null = null
+    let clickY: number | null = null
+
+    if (event) {
+      if ('clientX' in event) {
+        clickX = event.clientX
+        clickY = event.clientY
+      } else if (event.touches && event.touches.length > 0) {
+        clickX = event.touches[0].clientX
+        clickY = event.touches[0].clientY
+      } else if (event.changedTouches && event.changedTouches.length > 0) {
+        clickX = event.changedTouches[0].clientX
+        clickY = event.changedTouches[0].clientY
+      }
+    }
+
+    reportClickEvent(eventType, elementId, elementType, relatedId, relatedType, clickX, clickY)
+  }
+
   // 批量上报页面访问
   const batchReportPageView = async () => {
     if (pageViewQueue.length === 0) return
@@ -74,7 +136,7 @@ export const useStatistics = () => {
     pageViewQueue = []
 
     try {
-      await $fetch(`${config.public.apiBase}/statistics/page-views/batch`, {
+      await $fetch(`${config.public.apiBase}/statistics/page-view`, {
         method: 'POST',
         body: { pageViews: data },
       })
@@ -91,7 +153,7 @@ export const useStatistics = () => {
     clickEventQueue = []
 
     try {
-      await $fetch(`${config.public.apiBase}/statistics/click-events/batch`, {
+      await $fetch(`${config.public.apiBase}/statistics/click-event`, {
         method: 'POST',
         body: { clickEvents: data },
       })
@@ -108,8 +170,11 @@ export const useStatistics = () => {
 
   return {
     init,
+    trackPageView,
+    trackPageHide,
     reportPageView,
     reportClickEvent,
+    reportClickEventWithPosition,
   }
 }
 

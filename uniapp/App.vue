@@ -6,9 +6,12 @@
 
 <script setup lang="ts">
 import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
+import { initStatistics } from './utils/statistics'
 
 onLaunch(() => {
   console.log('App Launch')
+  // 初始化统计SDK
+  initStatistics()
 })
 
 onShow(() => {

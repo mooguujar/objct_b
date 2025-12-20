@@ -78,6 +78,12 @@ definePageMeta({
 })
 
 const api = useApi()
+const statistics = useStatistics()
+
+// 页面访问统计
+onMounted(() => {
+  statistics.trackPageView('/index', '首页')
+})
 
 const currentTab = ref('discover')
 const postList = ref<any[]>([])
@@ -97,6 +103,19 @@ const switchTab = (key: string) => {
   currentTab.value = key
   page.value = 1
   hasMore.value = true
+  
+  // 记录标签切换
+  if (process.client) {
+    const statistics = useStatistics()
+    statistics.reportClickEventWithPosition(
+      'tab_switch',
+      `tab_${key}`,
+      'tab',
+      null,
+      'index',
+      null
+    )
+  }
   
   if (key === 'discover') {
     postList.value = []

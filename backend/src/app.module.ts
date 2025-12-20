@@ -13,6 +13,7 @@ import { CreatorModule } from './modules/creator/creator.module';
 import { CommentModule } from './modules/comment/comment.module';
 import { SearchModule } from './modules/search/search.module';
 import { CoinModule } from './modules/coin/coin.module';
+import { StatisticsModule } from './modules/statistics/statistics.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { CoinModule } from './modules/coin/coin.module';
     CommentModule,
     SearchModule,
     CoinModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

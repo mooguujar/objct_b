@@ -68,6 +68,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
+import { trackPageView, trackPageHide } from '@/utils/statistics'
 import { contentApi } from '@/api/content'
 import PostCard from '@/components/PostCard.vue'
 import FeedCard from '@/components/FeedCard.vue'
@@ -99,6 +101,10 @@ const switchTab = (key: string) => {
   currentTab.value = key
   page.value = 1
   hasMore.value = true
+  
+  // 记录标签切换
+  const { reportClickEventWithPosition } = require('@/utils/statistics')
+  reportClickEventWithPosition('tab_switch', `tab_${key}`, 'tab', null, 'index')
   
   if (key === 'discover') {
     postList.value = []
@@ -194,10 +200,25 @@ const onReachBottom = () => {
 }
 
 const handleSearch = () => {
+  // 记录搜索按钮点击
+  const { reportClickEventWithPosition } = require('@/utils/statistics')
+  reportClickEventWithPosition('button_click', 'btn_search', 'button', null, 'index')
+  
   uni.navigateTo({
     url: '/pages/search/index',
   })
 }
+
+onLoad(() => {
+  // 页面访问统计
+  trackPageView('/pages/index/index', '首页')
+  loadPostList()
+})
+
+onUnload(() => {
+  // 记录页面停留时长
+  trackPageHide()
+})
 
 onMounted(() => {
   loadPostList()
