@@ -1,10 +1,14 @@
 import {
   Controller,
   Get,
+  Post,
+  Delete,
   Param,
   Query,
   UseGuards,
   Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { IslandService } from './island.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -51,12 +55,45 @@ export class IslandController {
   ) {
     const userId = req?.user?.id ? BigInt(req.user.id) : undefined;
     const islandId = BigInt(id);
-    return this.islandService.getIslandPosts(
+    const result = await this.islandService.getIslandPosts(
       islandId,
       page ? parseInt(page) : 1,
       pageSize ? parseInt(pageSize) : 20,
       userId,
     );
+    return {
+      code: 200,
+      message: 'success',
+      data: result,
+    };
+  }
+
+  @Post(':id/join')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async joinIsland(@Param('id') id: string, @Request() req: any) {
+    const userId = BigInt(req.user.id);
+    const islandId = BigInt(id);
+    const result = await this.islandService.joinIsland(userId, islandId);
+    return {
+      code: 200,
+      message: result.message,
+      data: result,
+    };
+  }
+
+  @Delete(':id/join')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async leaveIsland(@Param('id') id: string, @Request() req: any) {
+    const userId = BigInt(req.user.id);
+    const islandId = BigInt(id);
+    const result = await this.islandService.leaveIsland(userId, islandId);
+    return {
+      code: 200,
+      message: result.message,
+      data: result,
+    };
   }
 }
 

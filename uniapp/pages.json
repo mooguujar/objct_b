@@ -57,6 +57,13 @@
         "navigationStyle": "custom",
         "enablePullDownRefresh": false
       }
+    },
+    {
+      "path": "pages/coin/recharge",
+      "style": {
+        "navigationBarTitleText": "金币充值",
+        "enablePullDownRefresh": true
+      }
     }
   ],
   "globalStyle": {
