@@ -1,5 +1,5 @@
-import prisma from '~/server/utils/prisma'
-import { getCurrentUser } from '~/server/utils/jwt'
+import prisma from '../../utils/prisma'
+import { getCurrentUser } from '../../utils/jwt'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

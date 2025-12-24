@@ -11,9 +11,10 @@ export const useApi = () => {
       ...options.headers
     }
 
-    // 添加token
-    if (authStore.token) {
-      headers['Authorization'] = `Bearer ${authStore.token}`
+    // 添加token（从 store 或 localStorage 获取）
+    const token = authStore.token || (process.client ? localStorage.getItem('token') : null)
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
     }
 
     const fetchOptions: any = {
@@ -22,15 +23,24 @@ export const useApi = () => {
     }
 
     if (options.body) {
-      fetchOptions.body = options.body
+      fetchOptions.body = JSON.stringify(options.body)
     }
 
-    const response = await $fetch<{ code: number; message: string; data: T }>(
-      `${config.public.apiBase}${url}`,
-      fetchOptions
-    )
-
-    return response
+    try {
+      const response = await $fetch<{ code: number; message: string; data: T }>(
+        `${config.public.apiBase}${url}`,
+        fetchOptions
+      )
+      return response
+    } catch (error: any) {
+      // 如果是 401 未授权错误，清除认证信息
+      if (error.statusCode === 401 || error.status === 401) {
+        if (process.client) {
+          authStore.clearAuth()
+        }
+      }
+      throw error
+    }
   }
 
   return {

@@ -76,8 +76,8 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useAuth } from '~/composables/useAuth'
-import { useStatistics } from '~/composables/useStatistics'
+import { useAuth } from '../composables/useAuth'
+import { useStatistics } from '../composables/useStatistics'
 import { ElMessage } from 'element-plus'
 
 definePageMeta({

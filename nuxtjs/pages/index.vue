@@ -43,32 +43,56 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useAuthStore } from '~/stores/auth'
-import { useAuth } from '~/composables/useAuth'
-import { useStatistics } from '~/composables/useStatistics'
+import { useAuthStore } from '../stores/auth'
+import { useAuth } from '../composables/useAuth'
+import { useStatistics } from '../composables/useStatistics'
 import { ElMessage } from 'element-plus'
+
+// 使用认证中间件，未登录自动跳转到登录页
+definePageMeta({
+  middleware: 'auth'
+})
 
 const authStore = useAuthStore()
 const { logout, fetchUserInfo } = useAuth()
 const { trackPageView, trackClick } = useStatistics()
 const router = useRouter()
 
-onMounted(() => {
-  // 初始化认证状态
+onMounted(async () => {
+  // 初始化认证状态（中间件已经检查过了，这里只是同步状态）
   authStore.initAuth()
   
-  // 如果已登录，获取最新用户信息
-  if (authStore.token) {
-    fetchUserInfo()
+  // 双重检查：如果 store 中没有 token，说明 localStorage 也没有，应该已经被中间件拦截
+  if (!authStore.token || !authStore.user) {
+    console.log('Index page: No auth found, redirecting to login')
+    authStore.clearAuth()
+    await router.push('/login')
+    return
   }
   
-  // 页面访问统计
-  trackPageView({
-    pagePath: '/',
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
-    device: 'web'
-  })
+  // 验证 token 是否有效（调用 API 验证）
+  try {
+    const result = await fetchUserInfo()
+    // 如果验证失败（token 无效或过期），清除认证信息并跳转到登录页
+    if (!result.success) {
+      console.log('Index page: Token validation failed, redirecting to login')
+      authStore.clearAuth()
+      await router.push('/login')
+      return
+    }
+    
+    // 验证成功，记录页面访问统计
+    trackPageView({
+      pagePath: '/',
+      referrer: document.referrer,
+      userAgent: navigator.userAgent,
+      device: 'web'
+    })
+  } catch (error) {
+    console.error('Index page: Error validating token:', error)
+    authStore.clearAuth()
+    await router.push('/login')
+  }
 })
 
 const goToLogin = () => {

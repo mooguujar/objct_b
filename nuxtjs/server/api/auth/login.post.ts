@@ -1,6 +1,6 @@
-import prisma from '~/server/utils/prisma'
-import { comparePassword } from '~/server/utils/password'
-import { generateToken } from '~/server/utils/jwt'
+import prisma from '../../utils/prisma'
+import { comparePassword } from '../../utils/password'
+import { generateToken } from '../../utils/jwt'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

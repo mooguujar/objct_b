@@ -8,17 +8,19 @@ export default defineNuxtConfig({
     '@pinia/nuxt'
   ],
 
-  css: ['~/assets/styles/main.css'],
+  // CSS 会在组件中自动引入，或者在 app.vue 中引入
+  // css: ['~/assets/styles/main.css'],
 
   runtimeConfig: {
     // 服务端私有配置（可通过环境变量覆盖）
-    jwtSecret: '',
-    jwtExpiresIn: '',
-    dbHost: '',
-    dbPort: '',
-    dbUser: '',
-    dbPassword: '',
-    databaseUrl: '',
+    // Nuxt 3 会自动读取 .env 文件中的环境变量
+    jwtSecret: process.env.JWT_SECRET || '',
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    dbHost: process.env.DB_HOST || '',
+    dbPort: process.env.DB_PORT || '',
+    dbUser: process.env.DB_USER || '',
+    dbPassword: process.env.DB_PASSWORD || '',
+    databaseUrl: process.env.DATABASE_URL || '',
     ossBucket: '',
     ossEndpoint: '',
     ossRegion: '',

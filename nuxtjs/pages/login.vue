@@ -51,8 +51,8 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { useAuth } from '~/composables/useAuth'
-import { useStatistics } from '~/composables/useStatistics'
+import { useAuth } from '../composables/useAuth'
+import { useStatistics } from '../composables/useStatistics'
 import { ElMessage } from 'element-plus'
 
 definePageMeta({
@@ -60,6 +60,7 @@ definePageMeta({
 })
 
 const router = useRouter()
+const route = useRoute()
 const { login } = useAuth()
 const { trackClick } = useStatistics()
 
@@ -102,7 +103,9 @@ const handleLogin = async () => {
     
     if (result.success) {
       ElMessage.success(result.message)
-      router.push('/')
+      // 登录成功后，跳转到原始页面或首页
+      const redirect = route.query.redirect as string || '/'
+      router.push(redirect)
     } else {
       ElMessage.error(result.message)
     }

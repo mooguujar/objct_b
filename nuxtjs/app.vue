@@ -5,12 +5,12 @@
 </template>
 
 <script setup lang="ts">
-import { useAuthStore } from '~/stores/auth'
+import { useAuthStore } from './stores/auth'
 
 const authStore = useAuthStore()
 
-// 初始化时恢复认证状态
-onMounted(() => {
+// 初始化时恢复认证状态（在客户端）
+if (process.client) {
   authStore.initAuth()
-})
+}
 </script>

@@ -21,7 +21,19 @@ export const useAuthStore = defineStore('auth', {
   }),
 
   getters: {
-    isAuthenticated: (state) => !!state.token && !!state.user,
+    isAuthenticated: (state) => {
+      // 在客户端检查，服务端总是返回 false
+      if (process.server) {
+        return false
+      }
+      // 同时检查 localStorage，确保数据一致
+      if (process.client) {
+        const token = localStorage.getItem('token')
+        const userStr = localStorage.getItem('user')
+        return !!(state.token && state.user && token && userStr)
+      }
+      return !!state.token && !!state.user
+    },
     isAdmin: (state) => state.user?.role === 'admin'
   },
 
