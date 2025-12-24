@@ -17,7 +17,10 @@ export default defineEventHandler(async (event) => {
   const userId = currentUser?.userId || null
 
   // 获取IP地址
-  const ip = getClientIP(event) || null
+  const xForwardedFor = getHeader(event, 'x-forwarded-for')
+  const ip = xForwardedFor 
+    ? xForwardedFor.split(',')[0].trim() 
+    : (event.node?.req?.socket?.remoteAddress || null)
 
   // 创建页面访问记录
   await prisma.page_view.create({
@@ -38,4 +41,3 @@ export default defineEventHandler(async (event) => {
     message: '统计成功'
   }
 })
-
