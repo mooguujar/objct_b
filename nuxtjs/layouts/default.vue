@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <NuxtPage />
+    <slot />
   </div>
 </template>
 
@@ -9,4 +9,3 @@
   min-height: 100vh;
 }
 </style>
-
