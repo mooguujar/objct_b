@@ -1,0 +1,538 @@
+/* 缺失页面样式补充 */
+
+// 地址管理页面样式增强
+.address-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  
+  .address-item {
+    background: #fff;
+    margin: 20rpx;
+    border-radius: 15rpx;
+    padding: 30rpx;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+    
+    .address-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15rpx;
+      
+      .addr-name {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333;
+      }
+      
+      .addr-phone {
+        font-size: 28rpx;
+        color: #666;
+        margin-left: 20rpx;
+      }
+      
+      .addr-default {
+        background: linear-gradient(135deg, #23c575, #19a059);
+        color: #fff;
+        font-size: 22rpx;
+        padding: 4rpx 12rpx;
+        border-radius: 20rpx;
+        margin-left: 15rpx;
+      }
+    }
+    
+    .addr-detail {
+      font-size: 28rpx;
+      color: #666;
+      line-height: 1.5;
+      margin-bottom: 20rpx;
+    }
+    
+    .addr-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 30rpx;
+      
+      .action-btn {
+        width: 60rpx;
+        height: 60rpx;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        
+        &.edit-btn {
+          background: rgba(0, 122, 255, 0.1);
+          color: #007aff;
+          
+          &:active {
+            background: rgba(0, 122, 255, 0.2);
+          }
+        }
+        
+        &.delete-btn {
+          background: rgba(229, 57, 53, 0.1);
+          color: #e53935;
+          
+          &:active {
+            background: rgba(229, 57, 53, 0.2);
+          }
+        }
+      }
+    }
+  }
+  
+  .add-btn {
+    position: fixed;
+    bottom: 40rpx;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600rpx;
+    height: 90rpx;
+    border-radius: 45rpx;
+    font-size: 32rpx;
+    font-weight: 500;
+    background: linear-gradient(135deg, #23c575, #19a059);
+    box-shadow: 0 4rpx 20rpx rgba(35, 197, 117, 0.3);
+    
+    &:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+  }
+}
+
+// 预约记录页面样式增强
+.appointment-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  
+  .appointment-container {
+    .status-tabs {
+      display: flex;
+      background: #fff;
+      padding: 20rpx 0;
+      border-bottom: 1rpx solid #f0f0f0;
+      
+      .tab-item {
+        flex: 1;
+        text-align: center;
+        padding: 20rpx 0;
+        position: relative;
+        transition: all 0.3s ease;
+        
+        &.active {
+          .tab-text {
+            color: #23c575;
+            font-weight: bold;
+          }
+          
+          &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40rpx;
+            height: 4rpx;
+            background: #23c575;
+            border-radius: 2rpx;
+          }
+        }
+        
+        .tab-text {
+          font-size: 28rpx;
+          color: #666;
+        }
+        
+        .tab-badge {
+          position: absolute;
+          top: 10rpx;
+          right: 20rpx;
+          background: #ff6b35;
+          color: #fff;
+          font-size: 20rpx;
+          padding: 2rpx 8rpx;
+          border-radius: 20rpx;
+          min-width: 30rpx;
+          text-align: center;
+        }
+      }
+    }
+    
+    .appointment-list {
+      height: calc(100vh - 200rpx);
+      
+      .appointment-item {
+        background: #fff;
+        margin: 20rpx;
+        border-radius: 20rpx;
+        padding: 30rpx;
+        box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+        
+        .appointment-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20rpx;
+          padding-bottom: 20rpx;
+          border-bottom: 1rpx solid #f8f8f8;
+          
+          .appointment-number {
+            font-size: 26rpx;
+            color: #999;
+          }
+          
+          .appointment-status {
+            font-size: 24rpx;
+            padding: 4rpx 12rpx;
+            border-radius: 20rpx;
+            
+            &.status-pending {
+              background: rgba(255, 193, 7, 0.1);
+              color: #f0ad4e;
+            }
+            
+            &.status-completed {
+              background: rgba(40, 167, 69, 0.1);
+              color: #28a745;
+            }
+            
+            &.status-cancelled {
+              background: rgba(220, 53, 69, 0.1);
+              color: #dc3545;
+            }
+          }
+        }
+        
+        .appointment-content {
+          .service-info {
+            display: flex;
+            gap: 20rpx;
+            margin-bottom: 20rpx;
+            
+            .service-image {
+              width: 120rpx;
+              height: 120rpx;
+              border-radius: 12rpx;
+              object-fit: cover;
+            }
+            
+            .service-details {
+              flex: 1;
+              
+              .service-name {
+                font-size: 30rpx;
+                font-weight: bold;
+                color: #333;
+                margin-bottom: 10rpx;
+                display: block;
+              }
+              
+              .service-time {
+                font-size: 26rpx;
+                color: #23c575;
+                margin-bottom: 8rpx;
+                display: block;
+              }
+              
+              .service-address {
+                font-size: 24rpx;
+                color: #666;
+              }
+            }
+          }
+          
+          .technician-info {
+            display: flex;
+            align-items: center;
+            gap: 15rpx;
+            padding: 20rpx;
+            background: #f8f9fa;
+            border-radius: 12rpx;
+            
+            .technician-details {
+              flex: 1;
+              
+              .technician-name {
+                font-size: 28rpx;
+                font-weight: bold;
+                color: #333;
+                display: block;
+                margin-bottom: 5rpx;
+              }
+              
+              .technician-rating {
+                display: flex;
+                align-items: center;
+                gap: 10rpx;
+                
+                .rating-text {
+                  font-size: 24rpx;
+                  color: #666;
+                }
+              }
+            }
+          }
+        }
+        
+        .appointment-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 15rpx;
+          margin-top: 20rpx;
+          
+          .action-btn {
+            height: 60rpx;
+            line-height: 60rpx;
+            font-size: 24rpx;
+            border-radius: 30rpx;
+            padding: 0 25rpx;
+            min-width: 120rpx;
+            text-align: center;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 钱包页面样式增强
+.wallet-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  
+  .wallet-container {
+    padding: 20rpx;
+    
+    .balance-card {
+      background: linear-gradient(135deg, #23c575, #19a059);
+      border-radius: 20rpx;
+      padding: 40rpx;
+      color: #fff;
+      margin-bottom: 30rpx;
+      box-shadow: 0 8rpx 32rpx rgba(35, 197, 117, 0.3);
+      
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30rpx;
+        
+        .card-title {
+          font-size: 32rpx;
+          font-weight: bold;
+        }
+        
+        .card-subtitle {
+          font-size: 24rpx;
+          opacity: 0.8;
+        }
+      }
+      
+      .balance-amount {
+        text-align: center;
+        margin-bottom: 40rpx;
+        
+        .amount-symbol {
+          font-size: 48rpx;
+          vertical-align: super;
+        }
+        
+        .amount-number {
+          font-size: 72rpx;
+          font-weight: bold;
+        }
+      }
+      
+      .card-actions {
+        display: flex;
+        gap: 20rpx;
+        
+        .action-btn {
+          flex: 1;
+          height: 80rpx;
+          border-radius: 40rpx;
+          font-size: 28rpx;
+          font-weight: 500;
+        }
+      }
+    }
+    
+    .assets-section {
+      background: #fff;
+      border-radius: 20rpx;
+      padding: 30rpx;
+      margin-bottom: 30rpx;
+      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+      
+      .section-title {
+        font-size: 32rpx;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 30rpx;
+      }
+      
+      .assets-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30rpx;
+        
+        .asset-item {
+          text-align: center;
+          padding: 30rpx 20rpx;
+          border-radius: 15rpx;
+          transition: all 0.3s ease;
+          
+          &:active {
+            background: #f8f9fa;
+            transform: scale(0.95);
+          }
+          
+          .asset-label {
+            font-size: 26rpx;
+            color: #666;
+            display: block;
+            margin: 10rpx 0 5rpx;
+          }
+          
+          .asset-value {
+            font-size: 32rpx;
+            font-weight: bold;
+            color: #333;
+          }
+        }
+      }
+    }
+    
+    .transaction-section {
+      background: #fff;
+      border-radius: 20rpx;
+      padding: 30rpx;
+      box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+      
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30rpx;
+        
+        .section-title {
+          font-size: 32rpx;
+          font-weight: bold;
+          color: #333;
+        }
+        
+        .section-more {
+          font-size: 26rpx;
+          color: #23c575;
+        }
+      }
+      
+      .transaction-list {
+        .transaction-item {
+          display: flex;
+          align-items: center;
+          padding: 25rpx 0;
+          border-bottom: 1rpx solid #f8f8f8;
+          
+          &:last-child {
+            border-bottom: none;
+          }
+          
+          .transaction-icon {
+            margin-right: 20rpx;
+          }
+          
+          .transaction-content {
+            flex: 1;
+            
+            .transaction-title {
+              font-size: 28rpx;
+              color: #333;
+              display: block;
+              margin-bottom: 5rpx;
+            }
+            
+            .transaction-time {
+              font-size: 24rpx;
+              color: #999;
+            }
+          }
+          
+          .transaction-amount {
+            font-size: 32rpx;
+            font-weight: bold;
+            
+            &.income {
+              color: #23c575;
+            }
+            
+            &.expense {
+              color: #ff6b6b;
+            }
+          }
+        }
+        
+        .empty-state {
+          text-align: center;
+          padding: 80rpx 0;
+          
+          .empty-text {
+            font-size: 28rpx;
+            color: #999;
+            margin-top: 20rpx;
+          }
+        }
+      }
+    }
+  }
+}
+
+// 通用空状态样式
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 40rpx;
+  
+  .empty-icon {
+    width: 120rpx;
+    height: 120rpx;
+    margin-bottom: 30rpx;
+    opacity: 0.5;
+  }
+  
+  .empty-title {
+    font-size: 32rpx;
+    color: #999;
+    margin-bottom: 15rpx;
+  }
+  
+  .empty-desc {
+    font-size: 26rpx;
+    color: #ccc;
+    margin-bottom: 50rpx;
+  }
+}
+
+// 加载动画
+.loading-spinner {
+  display: inline-block;
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #23c575;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
