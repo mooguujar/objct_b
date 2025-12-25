@@ -127,6 +127,9 @@ const switchTab = (tab: 'discover' | 'following' | 'islands') => {
   if (tab === 'following') {
     // 跳转到关注页
     router.push('/following')
+  } else if (tab === 'islands') {
+    // 跳转到热门岛屿页
+    router.push('/islands')
   } else {
     activeTab.value = tab
     loadData()

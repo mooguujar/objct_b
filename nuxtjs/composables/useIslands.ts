@@ -20,8 +20,26 @@ export interface Island {
   }
 }
 
+export interface IslandWithPreview extends Island {
+  previewPosts: Array<{
+    id: number
+    mediaUrls: string[] | null
+    mediaType: string
+  }>
+}
+
 export interface IslandListResponse {
   list: Island[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
+}
+
+export interface IslandListWithPreviewResponse {
+  list: IslandWithPreview[]
   pagination: {
     page: number
     pageSize: number
@@ -42,8 +60,27 @@ export const useIslands = () => {
     return response.data
   }
 
+  // 获取推荐岛屿列表
+  const getRecommendedIslands = async (limit = 10): Promise<{ list: Island[] }> => {
+    const response = await request<{ list: Island[] }>('/islands/recommended', {
+      method: 'GET',
+      query: { limit }
+    })
+    return response.data
+  }
+
+  // 按分类获取岛屿列表
+  const getIslandsByCategory = async (category: string, page = 1, pageSize = 20): Promise<IslandListWithPreviewResponse> => {
+    const response = await request<IslandListWithPreviewResponse>('/islands/category', {
+      method: 'GET',
+      query: { category, page, pageSize }
+    })
+    return response.data
+  }
+
   return {
-    getPopularIslands
+    getPopularIslands,
+    getRecommendedIslands,
+    getIslandsByCategory
   }
 }
-
