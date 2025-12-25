@@ -4,7 +4,7 @@ export const useApi = () => {
 
   const request = async <T = any>(
     url: string,
-    options: { method?: string; body?: any; headers?: HeadersInit } = {}
+    options: { method?: string; body?: any; query?: any; headers?: HeadersInit } = {}
   ): Promise<{ code: number; message: string; data: T }> => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
@@ -26,9 +26,25 @@ export const useApi = () => {
       fetchOptions.body = JSON.stringify(options.body)
     }
 
+    // 处理 query 参数
+    let finalUrl = `${config.public.apiBase}${url}`
+    if (options.query && Object.keys(options.query).length > 0) {
+      const queryString = new URLSearchParams(
+        Object.entries(options.query).reduce((acc, [key, value]) => {
+          if (value !== undefined && value !== null) {
+            acc[key] = String(value)
+          }
+          return acc
+        }, {} as Record<string, string>)
+      ).toString()
+      if (queryString) {
+        finalUrl += `?${queryString}`
+      }
+    }
+
     try {
       const response = await $fetch<{ code: number; message: string; data: T }>(
-        `${config.public.apiBase}${url}`,
+        finalUrl,
         fetchOptions
       )
       return response
