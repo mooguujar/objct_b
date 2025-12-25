@@ -13,12 +13,6 @@ export default defineEventHandler(async (event) => {
   const userId = BigInt(currentUser.userId)
   const body = await readBody(event)
 
-  // 获取当前用户信息，检查性别是否已设置
-  const currentUserInfo = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { gender: true }
-  })
-
   // 构建更新数据
   const updateData: any = {
     updated_at: new Date()
@@ -40,17 +34,9 @@ export default defineEventHandler(async (event) => {
     updateData.birthday = body.birthday ? new Date(body.birthday) : null
   }
 
-  // 性别只能修改一次
+  // 允许修改性别
   if (body.gender !== undefined) {
-    // 如果当前性别为0（未选择）或null，允许设置
-    if (!currentUserInfo?.gender || currentUserInfo.gender === 0) {
-      updateData.gender = body.gender
-    } else {
-      throw createError({
-        statusCode: 400,
-        message: '性别只能修改一次，请谨慎修改'
-      })
-    }
+    updateData.gender = body.gender
   }
 
   // 更新用户信息
