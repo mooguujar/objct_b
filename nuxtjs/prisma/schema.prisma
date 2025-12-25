@@ -89,6 +89,8 @@ model creator_application {
   email                                      String?                    @db.VarChar(100)
   bio                                        String?                    @db.Text
   qualification_urls                         Json?
+  social_platforms                           Json?
+  social_account                             String?                    @db.VarChar(200)
   status                                     creator_application_status @default(pending)
   reject_reason                              String?                    @db.Text
   reviewed_by                                BigInt?                    @db.UnsignedBigInt
