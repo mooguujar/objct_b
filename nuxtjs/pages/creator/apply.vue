@@ -12,7 +12,7 @@
         </el-icon>
         <h1 class="text-lg font-semibold text-gray-900">申请入驻</h1>
         <button
-          class="px-4 py-1.5 bg-gray-900 text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors"
+          class="px-4 py-1.5 bg-black text-white rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
           :disabled="!canSubmit || submitting"
           @click="handleSubmit"
         >

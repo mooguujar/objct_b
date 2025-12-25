@@ -14,17 +14,7 @@ export default defineEventHandler(async (event) => {
 
   // 获取用户的申请记录
   const application = await prisma.creator_application.findUnique({
-    where: { user_id: userId },
-    select: {
-      id: true,
-      qualification_urls: true,
-      social_platforms: true,
-      social_account: true,
-      status: true,
-      reject_reason: true,
-      created_at: true,
-      updated_at: true
-    }
+    where: { user_id: userId }
   })
 
   if (!application) {
@@ -41,8 +31,8 @@ export default defineEventHandler(async (event) => {
     data: {
       id: Number(application.id),
       qualificationUrls: (application.qualification_urls as string[]) || [],
-      socialPlatforms: (application.social_platforms as string[]) || [],
-      socialAccount: application.social_account || '',
+      socialPlatforms: ((application as any).social_platforms as string[]) || [],
+      socialAccount: (application as any).social_account || '',
       status: application.status,
       rejectReason: application.reject_reason,
       createdAt: application.created_at.toISOString(),
