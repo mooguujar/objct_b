@@ -12,6 +12,28 @@ export default defineNuxtConfig({
   // CSS 会在组件中自动引入，或者在 app.vue 中引入
   // css: ['~/assets/styles/main.css'],
 
+  // Vite 配置，允许 ngrok 域名访问
+  vite: {
+    server: {
+      hmr: {
+        clientPort: 443
+      },
+      // 允许 ngrok 域名
+      allowedHosts: [
+        '.ngrok-free.app',
+        '.ngrok-free.dev',
+        '.ngrok.io',
+        '.ngrok.app'
+      ]
+    }
+  },
+
+  // 开发服务器配置
+  devServer: {
+    host: '0.0.0.0',
+    port: 3000
+  },
+
   runtimeConfig: {
     // 服务端私有配置（可通过环境变量覆盖）
     // Nuxt 3 会自动读取 .env 文件中的环境变量
