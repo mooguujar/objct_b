@@ -29,13 +29,19 @@
       <!-- 媒体内容 -->
       <div v-if="post.mediaUrls && post.mediaUrls.length > 0" class="mt-3">
         <div v-if="post.mediaType === 'image' || post.mediaType === 'mixed'" class="grid gap-2" :class="getImageGridClass(post.mediaUrls.length)">
-          <img
+          <el-image
             v-for="(url, index) in post.mediaUrls.slice(0, 9)"
             :key="index"
             :src="url"
             :alt="post.title || '图片'"
-            class="w-full h-auto object-cover rounded-lg"
+            class="w-full h-auto object-cover rounded-lg cursor-pointer"
             :class="getImageClass(post.mediaUrls.length, index)"
+            :preview-src-list="post.mediaUrls"
+            :initial-index="index"
+            fit="cover"
+            preview-teleported
+            lazy
+            @click="handleImageClick(index)"
           />
         </div>
       </div>
@@ -190,6 +196,16 @@ const handleShare = () => {
     content: { action: 'share', postId: props.post.id }
   })
   emit('share', props.post.id)
+}
+
+const handleImageClick = (index: number) => {
+  trackClick({
+    elementId: `post-image-${props.post.id}-${index}`,
+    elementType: 'image',
+    pagePath: '/following',
+    content: { action: 'preview-image', postId: props.post.id, index }
+  })
+  // el-image 组件会自动处理预览，这里只记录统计
 }
 </script>
 

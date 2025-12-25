@@ -114,6 +114,24 @@ export const useIslands = () => {
     return response.data
   }
 
+  // 获取我的岛屿列表
+  const getMyIslands = async (page = 1, pageSize = 20): Promise<IslandListResponse> => {
+    const response = await request<IslandListResponse>('/islands/my', {
+      method: 'GET',
+      query: { page, pageSize }
+    })
+    return response.data
+  }
+
+  // 获取我加入的岛屿列表
+  const getJoinedIslands = async (page = 1, pageSize = 20): Promise<IslandListResponse> => {
+    const response = await request<IslandListResponse>('/islands/joined', {
+      method: 'GET',
+      query: { page, pageSize }
+    })
+    return response.data
+  }
+
   // 加入岛屿
   const joinIsland = async (islandId: number): Promise<{ islandId: number; joinType: string; paidAmount: number }> => {
     const response = await request<{ islandId: number; joinType: string; paidAmount: number }>(`/islands/${islandId}/join`, {
@@ -128,6 +146,8 @@ export const useIslands = () => {
     getIslandsByCategory,
     getIslandDetail,
     getIslandPosts,
+    getMyIslands,
+    getJoinedIslands,
     joinIsland
   }
 }

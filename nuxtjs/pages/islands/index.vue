@@ -26,16 +26,83 @@
 
     <!-- 内容区域 -->
     <div class="px-4 py-4">
-      <!-- 为你推荐 -->
-      <div v-if="recommendedIslands.length > 0" class="mb-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-3">为你推荐</h2>
-        <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          <RecommendedCard
-            v-for="island in recommendedIslands"
-            :key="island.id"
-            :island="island"
-            @click="handleIslandClick"
-          />
+      <!-- 为你推荐和我的岛屿/加入的岛屿 -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-lg font-semibold text-gray-900">为你推荐</h2>
+          <div class="flex items-center gap-2">
+            <button
+              class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+              :class="activeIslandTab === 'my'
+                ? 'bg-green-500 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'"
+              @click="switchIslandTab('my')"
+            >
+              我的岛屿
+            </button>
+            <button
+              class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+              :class="activeIslandTab === 'joined'
+                ? 'bg-green-500 text-white'
+                : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'"
+              @click="switchIslandTab('joined')"
+            >
+              加入的岛屿
+            </button>
+          </div>
+        </div>
+        
+        <!-- 为你推荐内容 -->
+        <div v-if="activeIslandTab === 'recommended'">
+          <div v-if="recommendedIslands.length > 0" class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <RecommendedCard
+              v-for="island in recommendedIslands"
+              :key="island.id"
+              :island="island"
+              @click="handleIslandClick"
+            />
+          </div>
+          <div v-else class="flex flex-col items-center justify-center py-12">
+            <el-empty description="暂无推荐岛屿" />
+          </div>
+        </div>
+        
+        <!-- 我的岛屿内容 -->
+        <div v-else-if="activeIslandTab === 'my'">
+          <div v-if="!loadingMyIslands && myIslands.length === 0" class="flex flex-col items-center justify-center py-12">
+            <el-empty description="您还没有创建任何岛屿">
+              <el-button type="primary" size="small">创建岛屿</el-button>
+            </el-empty>
+          </div>
+          <div v-else class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <RecommendedCard
+              v-for="island in myIslands"
+              :key="island.id"
+              :island="island"
+              @click="handleIslandClick"
+            />
+          </div>
+          <div v-if="loadingMyIslands" class="py-4">
+            <el-skeleton :rows="1" animated />
+          </div>
+        </div>
+        
+        <!-- 加入的岛屿内容 -->
+        <div v-else-if="activeIslandTab === 'joined'">
+          <div v-if="!loadingJoinedIslands && joinedIslands.length === 0" class="flex flex-col items-center justify-center py-12">
+            <el-empty description="您还没有加入任何岛屿" />
+          </div>
+          <div v-else class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <RecommendedCard
+              v-for="island in joinedIslands"
+              :key="island.id"
+              :island="island"
+              @click="handleIslandClick"
+            />
+          </div>
+          <div v-if="loadingJoinedIslands" class="py-4">
+            <el-skeleton :rows="1" animated />
+          </div>
         </div>
       </div>
 
@@ -104,10 +171,11 @@ definePageMeta({
 })
 
 const router = useRouter()
-const { getRecommendedIslands, getIslandsByCategory } = useIslands()
+const { getRecommendedIslands, getIslandsByCategory, getMyIslands, getJoinedIslands } = useIslands()
 const { trackPageView, trackClick } = useStatistics()
 
 const activeTab = ref<'following' | 'discover' | 'islands'>('islands')
+const activeIslandTab = ref<'recommended' | 'my' | 'joined'>('recommended')
 const tabs = [
   { key: 'following', label: '关注' },
   { key: 'discover', label: '发现' },
@@ -124,16 +192,20 @@ const categories = [
 ]
 
 const recommendedIslands = ref<any[]>([])
+const myIslands = ref<any[]>([])
+const joinedIslands = ref<any[]>([])
 const islands = ref<IslandWithPreview[]>([])
 const loading = ref(false)
 const loadingMore = ref(false)
+const loadingMyIslands = ref(false)
+const loadingJoinedIslands = ref(false)
 const hasMore = ref(true)
 const activeCategory = ref('all')
 const currentPage = ref(1)
 const pageSize = 20
 
 // 切换标签
-const handleTabClick = (tab: 'following' | 'discover' | 'islands') => {
+const handleTabClick = (tab: string) => {
   trackClick({
     elementId: `tab-${tab}`,
     elementType: 'tab',
@@ -145,8 +217,25 @@ const handleTabClick = (tab: 'following' | 'discover' | 'islands') => {
     router.push('/following')
   } else if (tab === 'discover') {
     router.push('/')
-  } else {
-    activeTab.value = tab
+  } else if (tab === 'islands') {
+    activeTab.value = 'islands'
+  }
+}
+
+// 切换岛屿tab
+const switchIslandTab = (tab: 'recommended' | 'my' | 'joined') => {
+  trackClick({
+    elementId: `island-tab-${tab}`,
+    elementType: 'tab',
+    pagePath: '/islands',
+    content: { action: 'switch-island-tab', tab }
+  })
+  activeIslandTab.value = tab
+  
+  if (tab === 'my' && myIslands.value.length === 0) {
+    loadMyIslands()
+  } else if (tab === 'joined' && joinedIslands.value.length === 0) {
+    loadJoinedIslands()
   }
 }
 
@@ -170,6 +259,34 @@ const loadRecommended = async () => {
     recommendedIslands.value = response.list
   } catch (error: any) {
     console.error('加载推荐失败:', error)
+  }
+}
+
+// 加载我的岛屿
+const loadMyIslands = async () => {
+  if (loadingMyIslands.value) return
+  loadingMyIslands.value = true
+  try {
+    const response = await getMyIslands(1, 20)
+    myIslands.value = response.list
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载失败')
+  } finally {
+    loadingMyIslands.value = false
+  }
+}
+
+// 加载加入的岛屿
+const loadJoinedIslands = async () => {
+  if (loadingJoinedIslands.value) return
+  loadingJoinedIslands.value = true
+  try {
+    const response = await getJoinedIslands(1, 20)
+    joinedIslands.value = response.list
+  } catch (error: any) {
+    ElMessage.error(error.message || '加载失败')
+  } finally {
+    loadingJoinedIslands.value = false
   }
 }
 

@@ -19,6 +19,7 @@ export interface Post {
     username: string
     nickname: string
     avatar: string | null
+    isVerified?: boolean
   }
   island: {
     id: number
@@ -27,6 +28,37 @@ export interface Post {
   } | null
   isLiked: boolean
   isCollected?: boolean
+}
+
+export interface Comment {
+  id: number
+  postId: number
+  userId: number
+  content: string
+  parentId: number | null
+  likeCount: number
+  status: string
+  createdAt: string
+  updatedAt: string
+  user: {
+    id: number
+    username: string
+    nickname: string
+    avatar: string | null
+    isVerified: boolean
+  }
+  isLiked: boolean
+  replies?: Comment[]
+}
+
+export interface CommentListResponse {
+  list: Comment[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
 }
 
 export interface PostListResponse {
@@ -60,6 +92,23 @@ export const usePosts = () => {
     return response.data
   }
 
+  // 获取帖子详情
+  const getPostDetail = async (postId: number): Promise<Post> => {
+    const response = await request<Post>(`/posts/${postId}`, {
+      method: 'GET'
+    })
+    return response.data
+  }
+
+  // 获取帖子评论列表
+  const getPostComments = async (postId: number, page = 1, pageSize = 20): Promise<CommentListResponse> => {
+    const response = await request<CommentListResponse>(`/posts/${postId}/comments`, {
+      method: 'GET',
+      query: { page, pageSize }
+    })
+    return response.data
+  }
+
   // 点赞/取消点赞
   const toggleLike = async (postId: number): Promise<{ isLiked: boolean; likeCount: number }> => {
     const response = await request<{ isLiked: boolean; likeCount: number }>(`/posts/${postId}/like`, {
@@ -71,6 +120,8 @@ export const usePosts = () => {
   return {
     getDiscoverPosts,
     getFollowingPosts,
+    getPostDetail,
+    getPostComments,
     toggleLike
   }
 }

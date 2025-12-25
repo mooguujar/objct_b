@@ -1,8 +1,16 @@
 <template>
   <div class="island-card" @click="handleCardClick">
     <!-- 封面图 -->
-    <div v-if="island.cover" class="island-cover">
-      <img :src="island.cover" :alt="island.name" />
+    <div v-if="island.cover" class="island-cover" @click.stop="handleImageClick">
+      <el-image
+        :src="island.cover"
+        :alt="island.name"
+        :preview-src-list="[island.cover]"
+        fit="cover"
+        preview-teleported
+        lazy
+        class="island-cover-image"
+      />
     </div>
 
     <!-- 内容 -->
@@ -64,6 +72,16 @@ const handleCardClick = () => {
   })
   emit('click', props.island.id)
 }
+
+const handleImageClick = () => {
+  trackClick({
+    elementId: `island-cover-${props.island.id}`,
+    elementType: 'image',
+    pagePath: '/',
+    content: { action: 'preview-island-cover', islandId: props.island.id }
+  })
+  // el-image 组件会自动处理预览，这里只记录统计
+}
 </script>
 
 <style scoped>
@@ -87,7 +105,7 @@ const handleCardClick = () => {
   background: #f5f5f5;
 }
 
-.island-cover img {
+.island-cover-image {
   width: 100%;
   height: 100%;
   object-fit: cover;

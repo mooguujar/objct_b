@@ -36,12 +36,18 @@
         <div
           v-for="(post, index) in island.previewPosts"
           :key="index"
-          class="flex-shrink-0 w-16 h-16 rounded overflow-hidden bg-gray-100"
+          class="flex-shrink-0 w-16 h-16 rounded overflow-hidden bg-gray-100 cursor-pointer"
+          @click.stop="handlePreviewImageClick(post, index)"
         >
-          <img
+          <el-image
             v-if="post.mediaUrls && post.mediaUrls.length > 0 && (post.mediaType === 'image' || post.mediaType === 'mixed')"
             :src="post.mediaUrls[0]"
             :alt="`预览图${index + 1}`"
+            :preview-src-list="post.mediaUrls"
+            :initial-index="0"
+            fit="cover"
+            preview-teleported
+            lazy
             class="w-full h-full object-cover"
           />
           <div v-else class="w-full h-full flex items-center justify-center bg-gray-100">
@@ -84,6 +90,16 @@ const handleClick = () => {
   emit('click', props.island.id)
   // 同时直接跳转（双重保障）
   router.push(`/islands/${props.island.id}`)
+}
+
+const handlePreviewImageClick = (post: any, index: number) => {
+  trackClick({
+    elementId: `island-preview-image-${props.island.id}-${index}`,
+    elementType: 'image',
+    pagePath: '/islands',
+    content: { action: 'preview-image', islandId: props.island.id, postId: post.id, index }
+  })
+  // el-image 组件会自动处理预览，这里只记录统计
 }
 </script>
 

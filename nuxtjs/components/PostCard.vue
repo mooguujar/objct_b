@@ -1,12 +1,17 @@
 <template>
   <div class="post-card" @click="handleCardClick">
     <!-- 媒体内容 -->
-    <div v-if="post.mediaUrls && post.mediaUrls.length > 0" class="post-media">
-      <img
+    <div v-if="post.mediaUrls && post.mediaUrls.length > 0" class="post-media" @click.stop="handleImageClick">
+      <el-image
         v-if="post.mediaType === 'image' || post.mediaType === 'mixed'"
         :src="post.mediaUrls[0]"
         :alt="post.title || '图片'"
         class="post-image"
+        :preview-src-list="post.mediaUrls"
+        :initial-index="0"
+        fit="cover"
+        preview-teleported
+        lazy
       />
       <div v-if="post.mediaUrls.length > 1" class="media-count">+{{ post.mediaUrls.length - 1 }}</div>
     </div>
@@ -88,6 +93,16 @@ const handleCardClick = () => {
     content: { action: 'view-post', postId: props.post.id }
   })
   emit('click', props.post.id)
+}
+
+const handleImageClick = () => {
+  trackClick({
+    elementId: `post-image-${props.post.id}`,
+    elementType: 'image',
+    pagePath: '/',
+    content: { action: 'preview-image', postId: props.post.id }
+  })
+  // el-image 组件会自动处理预览，这里只记录统计
 }
 </script>
 
