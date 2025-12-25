@@ -22,11 +22,11 @@ export default defineNuxtConfig({
     dbUser: process.env.DB_USER || '',
     dbPassword: process.env.DB_PASSWORD || '',
     databaseUrl: process.env.DATABASE_URL || '',
-    ossBucket: '',
-    ossEndpoint: '',
-    ossRegion: '',
-    ossAccessKeyId: '',
-    ossAccessKeySecret: '',
+    ossBucket: process.env.OSS_BUCKET || '',
+    ossEndpoint: process.env.OSS_ENDPOINT || '',
+    ossRegion: process.env.OSS_REGION || '',
+    ossAccessKeyId: process.env.OSS_ACCESS_KEY || process.env.OSS_ACCESS_KEY || '',
+    ossAccessKeySecret: process.env.OSS_ACCESS_SECRET || process.env.OSS_ACCESS_SECRET || '',
     
     // 客户端公开配置
     public: {

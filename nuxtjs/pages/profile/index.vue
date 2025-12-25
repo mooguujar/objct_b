@@ -1,7 +1,11 @@
 <template>
   <div class="profile-page min-h-screen pb-20">
-    <!-- 顶部用户信息区域（带渐变背景） -->
-    <div class="top-section bg-gradient-to-r from-yellow-100 via-green-100 to-blue-100">
+    <!-- 顶部用户信息区域（带渐变背景或背景图） -->
+    <div
+      class="top-section"
+      :class="userInfo?.backgroundImage ? 'bg-cover bg-center bg-no-repeat' : 'bg-gradient-to-r from-yellow-100 via-green-100 to-blue-100'"
+      :style="userInfo?.backgroundImage ? { backgroundImage: `url(${userInfo.backgroundImage})` } : {}"
+    >
       <div class="px-4 pt-4 pb-6">
         <!-- 用户头像和ID -->
         <div class="flex items-center justify-between mb-4">
@@ -168,6 +172,7 @@ interface UserInfo {
   nickname: string
   avatar: string | null
   bio: string | null
+  backgroundImage: string | null
   userCode: string
   coinBalance: number
   followCount: number
@@ -327,6 +332,23 @@ onMounted(async () => {
 
 .top-section {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.top-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+  pointer-events: none;
+}
+
+.top-section > div {
+  position: relative;
+  z-index: 1;
 }
 
 .coin-balance-bar {

@@ -60,6 +60,31 @@ export default defineEventHandler(async (event) => {
     accessKeySecret: config.ossAccessKeySecret
   }
 
+  // 验证OSS配置
+  const missingConfigs: string[] = []
+  if (!ossConfig.bucket) missingConfigs.push('OSS_BUCKET')
+  if (!ossConfig.endpoint) missingConfigs.push('OSS_ENDPOINT')
+  if (!ossConfig.region) missingConfigs.push('OSS_REGION')
+  if (!ossConfig.accessKeyId) missingConfigs.push('OSS_ACCESS_KEY_ID 或 OSS_ACCESS_KE')
+  if (!ossConfig.accessKeySecret) missingConfigs.push('OSS_ACCESS_KEY_SECRET 或 OSS_ACCESS_s')
+  
+  if (missingConfigs.length > 0) {
+    console.error('OSS配置检查失败:', {
+      missing: missingConfigs,
+      configStatus: {
+        bucket: ossConfig.bucket ? `已设置(${ossConfig.bucket.length}字符)` : '未设置',
+        endpoint: ossConfig.endpoint ? `已设置(${ossConfig.endpoint.length}字符)` : '未设置',
+        region: ossConfig.region ? `已设置(${ossConfig.region.length}字符)` : '未设置',
+        accessKeyId: ossConfig.accessKeyId ? `已设置(${ossConfig.accessKeyId.length}字符)` : '未设置',
+        accessKeySecret: ossConfig.accessKeySecret ? `已设置(${ossConfig.accessKeySecret.length}字符)` : '未设置'
+      }
+    })
+    throw createError({
+      statusCode: 500,
+      message: `OSS配置不完整，缺少以下配置项：${missingConfigs.join(', ')}。请检查 .env 文件是否在 nuxtjs 目录下，并确保已重启服务器。`
+    })
+  }
+
   try {
     const url = await uploadToOSS(file.data, fileName, ossConfig)
     

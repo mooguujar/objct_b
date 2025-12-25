@@ -213,6 +213,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useStatistics } from '../../composables/useStatistics'
 import { useApi } from '../../composables/useApi'
+import { useAuthStore } from '../../stores/auth'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowLeft,
@@ -371,11 +372,20 @@ const handleAvatarChange = async (e: Event) => {
     const uploadFormData = new FormData()
     uploadFormData.append('file', file)
 
+    // 获取token
+    const authStore = useAuthStore()
+    const token = authStore.token || (process.client ? localStorage.getItem('token') : null)
+
     const response = await $fetch<{ code: number; message: string; data: { url: string } }>(
       '/api/upload/avatar',
       {
         method: 'POST',
-        body: uploadFormData
+        body: uploadFormData,
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`
+            }
+          : {}
       }
     )
 
@@ -426,11 +436,20 @@ const handleBackgroundChange = async (e: Event) => {
     const uploadFormData = new FormData()
     uploadFormData.append('file', file)
 
+    // 获取token
+    const authStore = useAuthStore()
+    const token = authStore.token || (process.client ? localStorage.getItem('token') : null)
+
     const response = await $fetch<{ code: number; message: string; data: { url: string } }>(
       '/api/upload/background',
       {
         method: 'POST',
-        body: uploadFormData
+        body: uploadFormData,
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`
+            }
+          : {}
       }
     )
 

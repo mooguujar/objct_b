@@ -1,4 +1,18 @@
+// 类型声明
+type OSSClient = {
+  put(name: string, file: Buffer | string): Promise<{ url: string }>
+}
+
+type OSSConstructor = new (config: {
+  bucket: string
+  endpoint: string
+  region: string
+  accessKeyId: string
+  accessKeySecret: string
+}) => OSSClient
+
 import OSS from 'ali-oss'
+const OSSClient = OSS as unknown as OSSConstructor
 
 export function createOSSClient(config: {
   bucket: string
@@ -7,7 +21,7 @@ export function createOSSClient(config: {
   accessKeyId: string
   accessKeySecret: string
 }) {
-  return new OSS({
+  return new OSSClient({
     bucket: config.bucket,
     endpoint: config.endpoint,
     region: config.region,
