@@ -89,17 +89,18 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useIslands, type IslandWithPreview } from '../composables/useIslands'
-import { useStatistics } from '../composables/useStatistics'
+import { useIslands, type IslandWithPreview } from '../../composables/useIslands'
+import { useStatistics } from '../../composables/useStatistics'
 import { ElMessage } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-import RecommendedCard from '../components/RecommendedCard.vue'
-import IslandListItem from '../components/IslandListItem.vue'
-import BottomNav from '../components/BottomNav.vue'
+import RecommendedCard from '../../components/RecommendedCard.vue'
+import IslandListItem from '../../components/IslandListItem.vue'
+import BottomNav from '../../components/BottomNav.vue'
 
 // 使用认证中间件
 definePageMeta({
-  middleware: 'auth'
+  middleware: 'auth',
+  name: 'islands' // 明确指定路由名称
 })
 
 const router = useRouter()
@@ -208,6 +209,7 @@ const loadMore = () => {
 
 // 点击岛屿
 const handleIslandClick = (islandId: number) => {
+  console.log('handleIslandClick called, islandId:', islandId)
   router.push(`/islands/${islandId}`)
 }
 

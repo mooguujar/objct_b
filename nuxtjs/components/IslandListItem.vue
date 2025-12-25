@@ -56,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import type { IslandWithPreview } from '../composables/useIslands'
 import { useStatistics } from '../composables/useStatistics'
 import { ArrowRight, Picture } from '@element-plus/icons-vue'
@@ -69,8 +70,8 @@ const emit = defineEmits<{
   click: [islandId: number]
 }>()
 
-const { trackClick } = useStatistics()
 const router = useRouter()
+const { trackClick } = useStatistics()
 
 const handleClick = () => {
   trackClick({
@@ -79,6 +80,9 @@ const handleClick = () => {
     pagePath: '/islands',
     content: { action: 'view-island', islandId: props.island.id }
   })
+  // 触发事件，让父组件处理跳转
+  emit('click', props.island.id)
+  // 同时直接跳转（双重保障）
   router.push(`/islands/${props.island.id}`)
 }
 </script>

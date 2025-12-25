@@ -20,6 +20,12 @@ export interface Island {
   }
 }
 
+export interface IslandDetail extends Island {
+  status: string
+  isMember: boolean
+  joinType: 'free' | 'paid' | null
+}
+
 export interface IslandWithPreview extends Island {
   previewPosts: Array<{
     id: number
@@ -46,6 +52,17 @@ export interface IslandListWithPreviewResponse {
     total: number
     totalPages: number
   }
+}
+
+export interface IslandPostsResponse {
+  list: any[]
+  pagination: {
+    page: number
+    pageSize: number
+    total: number
+    totalPages: number
+  }
+  isMember: boolean
 }
 
 export const useIslands = () => {
@@ -78,9 +95,39 @@ export const useIslands = () => {
     return response.data
   }
 
+  // 获取岛屿详情
+  const getIslandDetail = async (islandId: number): Promise<IslandDetail> => {
+    console.log('getIslandDetail called with islandId:', islandId)
+    const response = await request<IslandDetail>(`/islands/${islandId}`, {
+      method: 'GET'
+    })
+    console.log('getIslandDetail response:', response)
+    return response.data
+  }
+
+  // 获取岛屿帖子列表
+  const getIslandPosts = async (islandId: number, page = 1, pageSize = 20): Promise<IslandPostsResponse> => {
+    const response = await request<IslandPostsResponse>(`/islands/${islandId}/posts`, {
+      method: 'GET',
+      query: { page, pageSize }
+    })
+    return response.data
+  }
+
+  // 加入岛屿
+  const joinIsland = async (islandId: number): Promise<{ islandId: number; joinType: string; paidAmount: number }> => {
+    const response = await request<{ islandId: number; joinType: string; paidAmount: number }>(`/islands/${islandId}/join`, {
+      method: 'POST'
+    })
+    return response.data
+  }
+
   return {
     getPopularIslands,
     getRecommendedIslands,
-    getIslandsByCategory
+    getIslandsByCategory,
+    getIslandDetail,
+    getIslandPosts,
+    joinIsland
   }
 }
