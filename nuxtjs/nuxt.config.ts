@@ -3,10 +3,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   
-  modules: [
-    '@element-plus/nuxt',
-    '@pinia/nuxt'
-  ],
+      modules: [
+        '@element-plus/nuxt',
+        '@pinia/nuxt',
+        '@nuxtjs/tailwindcss'
+      ],
 
   // CSS 会在组件中自动引入，或者在 app.vue 中引入
   // css: ['~/assets/styles/main.css'],

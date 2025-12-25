@@ -124,8 +124,13 @@ const switchTab = (tab: 'discover' | 'following' | 'islands') => {
     pagePath: '/',
     content: { action: 'switch-tab', tab }
   })
-  activeTab.value = tab
-  loadData()
+  if (tab === 'following') {
+    // 跳转到关注页
+    router.push('/following')
+  } else {
+    activeTab.value = tab
+    loadData()
+  }
 }
 
 // 加载数据

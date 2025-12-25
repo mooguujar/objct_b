@@ -26,6 +26,7 @@ export interface Post {
     avatar: string | null
   } | null
   isLiked: boolean
+  isCollected?: boolean
 }
 
 export interface PostListResponse {
@@ -73,4 +74,3 @@ export const usePosts = () => {
     toggleLike
   }
 }
-

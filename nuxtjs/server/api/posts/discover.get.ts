@@ -40,7 +40,19 @@ export default defineEventHandler(async (event) => {
               },
               select: {
                 id: true
-              }
+              },
+              take: 1
+            }
+          : false,
+        post_collect: userId
+          ? {
+              where: {
+                user_id: BigInt(userId)
+              },
+              select: {
+                id: true
+              },
+              take: 1
             }
           : false
       },
@@ -87,7 +99,8 @@ export default defineEventHandler(async (event) => {
           avatar: post.island.avatar
         }
       : null,
-    isLiked: userId ? (post.post_like && Array.isArray(post.post_like) ? post.post_like.length > 0 : false) : false
+    isLiked: userId ? (post.post_like && Array.isArray(post.post_like) ? post.post_like.length > 0 : false) : false,
+    isCollected: userId ? (post.post_collect && Array.isArray(post.post_collect) ? post.post_collect.length > 0 : false) : false
   }))
 
   return {
