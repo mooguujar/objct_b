@@ -12,18 +12,20 @@ export default defineNuxtConfig({
   // CSS 会在组件中自动引入，或者在 app.vue 中引入
   // css: ['~/assets/styles/main.css'],
 
-  // Vite 配置，允许 ngrok 域名访问
+  // Vite 配置，允许隧道域名访问
   vite: {
     server: {
       hmr: {
         clientPort: 443
       },
-      // 允许 ngrok 域名
+      // 允许隧道域名（ngrok、Cloudflare Tunnel 等）
       allowedHosts: [
         '.ngrok-free.app',
         '.ngrok-free.dev',
         '.ngrok.io',
-        '.ngrok.app'
+        '.ngrok.app',
+        '.trycloudflare.com',
+        'localhost'
       ]
     }
   },
