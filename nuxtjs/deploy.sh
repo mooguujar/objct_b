@@ -64,7 +64,7 @@ if command -v pm2 &> /dev/null; then
         pm2 restart $APP_NAME
         echo "✓ 应用已重启"
     else
-        pm2 start ecosystem.config.js
+        pm2 start ecosystem.config.cjs
         echo "✓ 应用已启动"
     fi
     

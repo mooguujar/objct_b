@@ -104,13 +104,13 @@ case $choice in
             npm install -g pm2
         fi
         
-        if [ -f "ecosystem.config.js" ]; then
+        if [ -f "ecosystem.config.cjs" ]; then
             if pm2 list | grep -q "$APP_NAME"; then
                 echo "重启 PM2 应用..."
                 pm2 restart $APP_NAME
             else
                 echo "启动 PM2 应用..."
-                pm2 start ecosystem.config.js
+                pm2 start ecosystem.config.cjs
             fi
             pm2 save
             echo ""
@@ -119,7 +119,7 @@ case $choice in
             echo ""
             echo "查看日志: pm2 logs $APP_NAME"
         else
-            echo "未找到 ecosystem.config.js，使用简单方式启动..."
+            echo "未找到 ecosystem.config.cjs，使用简单方式启动..."
             if [ "$USE_EXPERIMENTAL_FETCH" = true ]; then
                 echo "⚠️  使用 Node.js 16，添加 --experimental-fetch 标志"
                 pm2 start .output/server/index.mjs --name $APP_NAME --node-args="--experimental-fetch"
