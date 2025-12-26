@@ -255,7 +255,7 @@ const switchCategory = (category: string) => {
 // 加载推荐数据
 const loadRecommended = async () => {
   try {
-    const response = await getRecommendedIslands(10)
+    const response = await getRecommendedIslands(4)
     recommendedIslands.value = response.list
   } catch (error: any) {
     console.error('加载推荐失败:', error)
