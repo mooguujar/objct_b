@@ -19,57 +19,167 @@ DB_HOST="0.0.0.0"
 
 echo -e "${GREEN}开始初始化 MySQL 数据库...${NC}"
 
-# 检查 MySQL 是否已安装
-if ! command -v mysql &> /dev/null; then
-    echo -e "${YELLOW}MySQL 未安装，开始安装...${NC}"
-    
-    # 检测系统类型
-    if [ -f /etc/debian_version ]; then
-        # Debian/Ubuntu
-        sudo apt update
-        sudo apt install mysql-server -y
-        MYSQL_SERVICE="mysql"
-    elif [ -f /etc/redhat-release ]; then
-        # CentOS/RHEL
-        sudo yum install mysql-server -y
+# 检测系统类型
+if [ -f /etc/redhat-release ]; then
+    # CentOS/RHEL
+    SYSTEM_TYPE="redhat"
+    MYSQL_SERVICE="mysqld"
+elif [ -f /etc/debian_version ]; then
+    # Debian/Ubuntu
+    SYSTEM_TYPE="debian"
+    MYSQL_SERVICE="mysql"
+else
+    SYSTEM_TYPE="unknown"
+fi
+
+# 检查 MySQL 服务是否存在
+MYSQL_INSTALLED=false
+if systemctl list-unit-files | grep -qiE "mysqld.service"; then
+    MYSQL_INSTALLED=true
+    MYSQL_SERVICE="mysqld"
+elif systemctl list-unit-files | grep -qiE "mysql.service"; then
+    MYSQL_INSTALLED=true
+    MYSQL_SERVICE="mysql"
+fi
+
+# 如果服务不存在，检查服务文件
+if [ "$MYSQL_INSTALLED" = false ]; then
+    if [ -f /usr/lib/systemd/system/mysqld.service ] || [ -f /etc/systemd/system/mysqld.service ]; then
+        MYSQL_INSTALLED=true
         MYSQL_SERVICE="mysqld"
-    else
-        echo -e "${RED}不支持的系统类型，请手动安装 MySQL${NC}"
-        exit 1
+    elif [ -f /usr/lib/systemd/system/mysql.service ] || [ -f /etc/systemd/system/mysql.service ]; then
+        MYSQL_INSTALLED=true
+        MYSQL_SERVICE="mysql"
     fi
+fi
+
+# 如果服务存在但未运行，尝试启动
+if [ "$MYSQL_INSTALLED" = true ]; then
+    echo -e "${GREEN}检测到 MySQL 服务已安装 (${MYSQL_SERVICE})${NC}"
+    
+    # 检查服务状态
+    if ! systemctl is-active --quiet $MYSQL_SERVICE; then
+        echo -e "${YELLOW}启动 MySQL 服务...${NC}"
+        sudo systemctl start $MYSQL_SERVICE
+        sleep 2
+    fi
+    
+    # 确保服务开机自启
+    if ! systemctl is-enabled --quiet $MYSQL_SERVICE; then
+        sudo systemctl enable $MYSQL_SERVICE
+    fi
+else
+    echo -e "${YELLOW}MySQL 服务未安装，开始安装...${NC}"
+    
+    # if [ "$SYSTEM_TYPE" = "debian" ]; then
+    #     # Debian/Ubuntu
+    #     sudo apt update
+    #     sudo apt install mysql-server -y
+    #     MYSQL_SERVICE="mysql"
+    # elif [ "$SYSTEM_TYPE" = "redhat" ]; then
+    #     # CentOS/RHEL
+    #     sudo yum install mysql-server -y
+    #     MYSQL_SERVICE="mysqld"
+    # else
+    #     echo -e "${RED}不支持的系统类型，请手动安装 MySQL${NC}"
+    #     exit 1
+    # fi
     
     # 启动 MySQL
     sudo systemctl start $MYSQL_SERVICE
     sudo systemctl enable $MYSQL_SERVICE
     echo -e "${GREEN}MySQL 安装完成${NC}"
-else
-    echo -e "${GREEN}MySQL 已安装${NC}"
-    # 检测服务名称
-    if systemctl is-active --quiet mysql; then
-        MYSQL_SERVICE="mysql"
-    elif systemctl is-active --quiet mysqld; then
-        MYSQL_SERVICE="mysqld"
+fi
+
+# 检查 MySQL 客户端命令
+if ! command -v mysql &> /dev/null; then
+    echo -e "${YELLOW}MySQL 客户端未安装，尝试安装...${NC}"
+    if [ "$SYSTEM_TYPE" = "debian" ]; then
+        sudo apt install mysql-client -y
+    elif [ "$SYSTEM_TYPE" = "redhat" ]; then
+        sudo yum install mysql -y
     fi
 fi
 
+# 等待 MySQL 完全启动
+echo -e "${YELLOW}等待 MySQL 服务启动...${NC}"
+sleep 3
+
 # 设置 root 密码
 echo -e "${YELLOW}设置 root 密码...${NC}"
-sudo mysql <<EOF
+
+# 尝试使用 sudo mysql 连接（无需密码）
+if sudo mysql -e "SELECT 1;" &> /dev/null; then
+    # 可以直接连接，设置密码
+    sudo mysql <<EOF
 ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
 FLUSH PRIVILEGES;
 EOF
+    echo -e "${GREEN}root 密码设置成功${NC}"
+elif mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1;" &> /dev/null; then
+    # 密码已设置
+    echo -e "${GREEN}root 密码已设置${NC}"
+else
+    # 需要密码或无法连接，尝试其他方法
+    echo -e "${YELLOW}尝试使用默认方式设置密码...${NC}"
+    # 对于 CentOS，可能需要先获取临时密码
+    if [ "$SYSTEM_TYPE" = "redhat" ]; then
+        # 检查是否有临时密码文件
+        TEMP_PASSWORD=$(sudo grep 'temporary password' /var/log/mysqld.log 2>/dev/null | tail -1 | awk '{print $NF}' || echo "")
+        if [ -n "$TEMP_PASSWORD" ]; then
+            echo -e "${YELLOW}检测到临时密码，正在设置新密码...${NC}"
+            mysql -u root -p"${TEMP_PASSWORD}" --connect-expired-password <<EOF
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+        else
+            # 尝试直接设置
+            sudo mysql <<EOF 2>/dev/null || true
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+        fi
+    else
+        # 其他系统尝试直接设置
+        sudo mysql <<EOF 2>/dev/null || true
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_ROOT_PASSWORD}';
+FLUSH PRIVILEGES;
+EOF
+    fi
+fi
 
 # 配置远程连接
 echo -e "${YELLOW}配置远程连接...${NC}"
 
 # 查找 MySQL 配置文件
 MYSQL_CONF=""
-if [ -f /etc/mysql/mysql.conf.d/mysqld.cnf ]; then
-    MYSQL_CONF="/etc/mysql/mysql.conf.d/mysqld.cnf"
-elif [ -f /etc/my.cnf ]; then
-    MYSQL_CONF="/etc/my.cnf"
-elif [ -f /etc/mysql/my.cnf ]; then
-    MYSQL_CONF="/etc/mysql/my.cnf"
+if [ "$SYSTEM_TYPE" = "redhat" ]; then
+    # CentOS/RHEL 配置文件位置
+    if [ -f /etc/my.cnf ]; then
+        MYSQL_CONF="/etc/my.cnf"
+    elif [ -f /etc/my.cnf.d/mysqld.cnf ]; then
+        MYSQL_CONF="/etc/my.cnf.d/mysqld.cnf"
+    elif [ -f /etc/mysql/my.cnf ]; then
+        MYSQL_CONF="/etc/mysql/my.cnf"
+    fi
+elif [ "$SYSTEM_TYPE" = "debian" ]; then
+    # Debian/Ubuntu 配置文件位置
+    if [ -f /etc/mysql/mysql.conf.d/mysqld.cnf ]; then
+        MYSQL_CONF="/etc/mysql/mysql.conf.d/mysqld.cnf"
+    elif [ -f /etc/mysql/my.cnf ]; then
+        MYSQL_CONF="/etc/mysql/my.cnf"
+    elif [ -f /etc/my.cnf ]; then
+        MYSQL_CONF="/etc/my.cnf"
+    fi
+else
+    # 通用查找
+    if [ -f /etc/my.cnf ]; then
+        MYSQL_CONF="/etc/my.cnf"
+    elif [ -f /etc/mysql/my.cnf ]; then
+        MYSQL_CONF="/etc/mysql/my.cnf"
+    elif [ -f /etc/mysql/mysql.conf.d/mysqld.cnf ]; then
+        MYSQL_CONF="/etc/mysql/mysql.conf.d/mysqld.cnf"
+    fi
 fi
 
 if [ -n "$MYSQL_CONF" ]; then
@@ -89,9 +199,24 @@ else
     echo -e "${YELLOW}未找到 MySQL 配置文件，请手动配置 bind-address = 0.0.0.0${NC}"
 fi
 
+# 确保 MySQL 服务正在运行
+if ! systemctl is-active --quiet $MYSQL_SERVICE; then
+    echo -e "${YELLOW}MySQL 服务未运行，正在启动...${NC}"
+    sudo systemctl start $MYSQL_SERVICE
+    sleep 3
+fi
+
 # 创建远程用户并授权
 echo -e "${YELLOW}创建远程访问用户...${NC}"
-mysql -u root -p${MYSQL_ROOT_PASSWORD} <<EOF
+
+# 尝试连接数据库
+MYSQL_CMD="mysql -u root"
+if ! $MYSQL_CMD -e "SELECT 1;" &> /dev/null; then
+    # 需要密码
+    MYSQL_CMD="mysql -u root -p${MYSQL_ROOT_PASSWORD}"
+fi
+
+$MYSQL_CMD <<EOF
 -- 创建远程用户
 CREATE USER IF NOT EXISTS '${DB_USER}'@'%' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';
 
@@ -130,10 +255,19 @@ fi
 
 # 测试连接
 echo -e "${YELLOW}测试数据库连接...${NC}"
-if mysql -u root -p${MYSQL_ROOT_PASSWORD} -e "SELECT 1;" &> /dev/null; then
+TEST_CMD="mysql -u root"
+if ! $TEST_CMD -e "SELECT 1;" &> /dev/null; then
+    TEST_CMD="mysql -u root -p${MYSQL_ROOT_PASSWORD}"
+fi
+
+if $TEST_CMD -e "SELECT 1;" &> /dev/null; then
     echo -e "${GREEN}数据库连接测试成功！${NC}"
 else
-    echo -e "${RED}数据库连接测试失败${NC}"
+    echo -e "${RED}数据库连接测试失败，请检查密码是否正确${NC}"
+    echo -e "${YELLOW}提示：如果密码设置失败，请手动执行以下命令：${NC}"
+    echo -e "  sudo mysql"
+    echo -e "  ALTER USER 'root'@'localhost' IDENTIFIED BY '${MYSQL_ROOT_PASSWORD}';"
+    echo -e "  FLUSH PRIVILEGES;"
     exit 1
 fi
 
