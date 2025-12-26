@@ -15,9 +15,11 @@ export default defineNuxtConfig({
   // Vite 配置，允许隧道域名访问
   vite: {
     server: {
-      hmr: {
-        clientPort: 443
-      },
+      hmr: process.env.NUXT_PUBLIC_HMR_PORT ? {
+        clientPort: parseInt(process.env.NUXT_PUBLIC_HMR_PORT),
+        protocol: process.env.NUXT_PUBLIC_HMR_PROTOCOL || 'ws',
+        host: process.env.NUXT_PUBLIC_HMR_HOST || 'localhost'
+      } : undefined,
       // 允许隧道域名（ngrok、Cloudflare Tunnel 等）
       allowedHosts: [
         '.ngrok-free.app',
@@ -27,6 +29,16 @@ export default defineNuxtConfig({
         '.trycloudflare.com',
         'localhost'
       ]
+    },
+    optimizeDeps: {
+      exclude: ['ali-oss']
+    }
+  },
+
+  // Nitro 配置：将 ali-oss 设为外部依赖，避免打包时的 TypeScript 解析错误
+  nitro: {
+    externals: {
+      inline: []
     }
   },
 
@@ -56,5 +68,6 @@ export default defineNuxtConfig({
     public: {
       apiBase: '/api'
     }
-  }
+  },
+
 })
