@@ -114,16 +114,10 @@ const currentPage = ref({
   islands: 1
 })
 
-const pageSize = 20
+const pageSize = 6
 
 // 切换标签
 const switchTab = (tab: 'discover' | 'following' | 'islands') => {
-  trackClick({
-    elementId: `tab-${tab}`,
-    elementType: 'tab',
-    pagePath: '/',
-    content: { action: 'switch-tab', tab }
-  })
   if (tab === 'following') {
     // 跳转到关注页
     router.push('/following')
@@ -134,6 +128,12 @@ const switchTab = (tab: 'discover' | 'following' | 'islands') => {
     activeTab.value = tab
     loadData()
   }
+  trackClick({
+    elementId: `tab-${tab}`,
+    elementType: 'tab',
+    pagePath: '/',
+    content: { action: 'switch-tab', tab }
+  })
 }
 
 // 加载数据
@@ -215,16 +215,16 @@ const handleSearch = () => {
 }
 
 onMounted(async () => {
-  // 记录页面访问
+  // 先加载数据，加快页面显示
+  await loadData()
+
+  // 统计接口在后台异步执行，不阻塞页面
   trackPageView({
     pagePath: '/',
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     device: 'web'
   })
-
-  // 加载初始数据
-  await loadData()
 })
 </script>
 

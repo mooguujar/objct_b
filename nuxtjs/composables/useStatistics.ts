@@ -10,10 +10,12 @@ export const useStatistics = () => {
     duration?: number
   }) => {
     try {
-      await request('/statistics/pageview', {
-        method: 'POST',
-        body: data
-      })
+      setTimeout(() => {
+        request('/statistics/pageview', {
+          method: 'POST',
+          body: data
+        })
+      }, 500)
     } catch (error) {
       console.error('页面访问统计失败:', error)
     }
@@ -27,10 +29,12 @@ export const useStatistics = () => {
     content?: any
   }) => {
     try {
-      await request('/statistics/click', {
-        method: 'POST',
-        body: data
-      })
+      setTimeout(() => {
+        request('/statistics/click', {
+          method: 'POST',
+          body: data
+        })
+      }, 500)
     } catch (error) {
       console.error('点击事件统计失败:', error)
     }

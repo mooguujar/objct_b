@@ -310,20 +310,20 @@ const loadPageData = async () => {
 
   console.log('Loading page data, islandId:', islandId.value)
   
-  // 记录页面访问
+  // 先加载数据，加快页面显示
+  console.log('Loading island detail...')
+  await loadIslandDetail()
+  console.log('Loading posts...')
+  await loadPosts()
+  console.log('Data loaded')
+
+  // 统计接口在后台异步执行，不阻塞页面
   trackPageView({
     pagePath: `/islands/${islandId.value}`,
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     device: 'web'
   })
-
-  // 加载数据
-  console.log('Loading island detail...')
-  await loadIslandDetail()
-  console.log('Loading posts...')
-  await loadPosts()
-  console.log('Data loaded')
 }
 
 // 监听路由变化

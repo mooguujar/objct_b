@@ -202,7 +202,7 @@ const loadingJoinedIslands = ref(false)
 const hasMore = ref(true)
 const activeCategory = ref('all')
 const currentPage = ref(1)
-const pageSize = 20
+const pageSize = 3
 
 // 切换标签
 const handleTabClick = (tab: string) => {
@@ -342,19 +342,17 @@ const handleSearch = () => {
 }
 
 onMounted(async () => {
-  // 记录页面访问
+  // 先加载数据，加快页面显示
+  await loadRecommended()
+  await loadData()
+
+  // 统计接口在后台异步执行，不阻塞页面
   trackPageView({
     pagePath: '/islands',
     referrer: document.referrer,
     userAgent: navigator.userAgent,
     device: 'web'
   })
-
-  // 加载推荐数据
-  await loadRecommended()
-
-  // 加载初始数据
-  await loadData()
 })
 </script>
 
