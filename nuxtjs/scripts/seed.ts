@@ -6,6 +6,32 @@ dotenv.config()
 
 const prisma = new PrismaClient()
 
+// 生成真实可用的图片 URL
+function getAvatarUrl(seed: number, size: number = 200): string {
+  // 使用 Picsum Photos 生成随机头像
+  return `https://picsum.photos/seed/avatar${seed}/${size}/${size}`
+}
+
+function getBackgroundUrl(seed: number, width: number = 1200, height: number = 400): string {
+  // 使用 Picsum Photos 生成随机背景图
+  return `https://picsum.photos/seed/bg${seed}/${width}/${height}`
+}
+
+function getPostImageUrl(seed: number, width: number = 800, height: number = 600): string {
+  // 使用 Picsum Photos 生成随机帖子图片
+  return `https://picsum.photos/seed/post${seed}/${width}/${height}`
+}
+
+function getIslandCoverUrl(seed: number, width: number = 1200, height: number = 400): string {
+  // 使用 Picsum Photos 生成岛屿封面
+  return `https://picsum.photos/seed/island${seed}/${width}/${height}`
+}
+
+function getIslandAvatarUrl(seed: number, size: number = 200): string {
+  // 使用 Picsum Photos 生成岛屿头像
+  return `https://picsum.photos/seed/island-avatar${seed}/${size}/${size}`
+}
+
 async function main() {
   try {
     console.log('开始创建测试数据...\n')
@@ -26,10 +52,36 @@ async function main() {
       throw error
     }
 
-    // 清空现有数据（可选，如果需要完全重置）
-    // await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0`
-    // await prisma.$executeRaw`TRUNCATE TABLE user`
-    // await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 1`
+    // 清空现有数据（避免重复数据冲突）
+    console.log('清空现有测试数据...')
+    try {
+      // 禁用外键检查
+      await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 0')
+      
+      // 按依赖关系顺序删除数据
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `notification`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `user_behavior`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `page_view`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `click_event`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `coin_transaction`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `comment_like`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `comment`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `post_like`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `post_collect`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `post`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `island_member`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `island`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `follow`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `creator_application`')
+      await prisma.$executeRawUnsafe('TRUNCATE TABLE `user`')
+      
+      // 重新启用外键检查
+      await prisma.$executeRawUnsafe('SET FOREIGN_KEY_CHECKS = 1')
+      console.log('✓ 现有数据已清空\n')
+    } catch (error: any) {
+      console.warn('⚠️  清空数据时出错，继续创建数据:', error.message)
+      console.warn('   如果遇到唯一约束错误，请手动清空数据或运行 npm run db:reset\n')
+    }
 
     const testPassword = await hashPassword('123456')
 
@@ -48,6 +100,8 @@ async function main() {
           password_hash: testPassword,
           role: 'user',
           bio: `这是第${i}个普通用户的简介`,
+          avatar: getAvatarUrl(i),
+          background_image: getBackgroundUrl(i),
           coin_balance: 100 + i * 10,
           updated_at: new Date()
         }
@@ -68,6 +122,8 @@ async function main() {
           password_hash: testPassword,
           role: 'creator',
           bio: `这是第${i}个创作者的简介`,
+          avatar: getAvatarUrl(10 + i),
+          background_image: getBackgroundUrl(10 + i),
           coin_balance: 500 + i * 50,
           is_verified: i <= 2, // 前2个创作者已验证
           updated_at: new Date()
@@ -89,6 +145,8 @@ async function main() {
           password_hash: testPassword,
           role: 'creator',
           bio: `这是第${i}个岛屿创建者的简介`,
+          avatar: getAvatarUrl(15 + i),
+          background_image: getBackgroundUrl(15 + i),
           coin_balance: 1000 + i * 100,
           is_verified: true,
           updated_at: new Date()
@@ -108,6 +166,8 @@ async function main() {
         password_hash: testPassword,
         role: 'admin',
         bio: '系统管理员',
+        avatar: getAvatarUrl(99),
+        background_image: getBackgroundUrl(99),
         coin_balance: 9999,
         is_verified: true,
         updated_at: new Date()
@@ -130,6 +190,8 @@ async function main() {
           description: `这是一个关于${categories[i]}的岛屿，欢迎加入！`,
           category: categories[i],
           owner_id: owner.id,
+          cover: getIslandCoverUrl(i + 1),
+          avatar: getIslandAvatarUrl(i + 1),
           price: i < 2 ? 0 : (i - 1) * 10, // 前2个免费，后面的付费
           member_count: 0,
           post_count: 0,
@@ -186,13 +248,22 @@ async function main() {
     // 普通帖子（10条）
     for (let i = 1; i <= 10; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
+      const isImage = i % 3 === 0
+      const isVideo = i % 3 === 1
+      // Prisma Json 类型直接传数组，不需要 JSON.stringify，null 用 undefined
+      const mediaUrls: string[] | undefined = isImage 
+        ? [getPostImageUrl(i)] 
+        : isVideo 
+        ? [getPostImageUrl(i + 100)] 
+        : undefined
+      
       const post = await prisma.post.create({
         data: {
           user_id: author.id,
           title: `测试帖子标题 ${i}`,
           content: `这是第${i}条测试帖子的内容。包含一些示例文本，用于测试系统功能。`,
-          media_type: i % 3 === 0 ? 'image' : (i % 3 === 1 ? 'video' : 'text'),
-          media_urls: i % 3 !== 2 ? JSON.stringify([`https://example.com/media/${i}.jpg`]) : null,
+          media_type: isImage ? 'image' : (isVideo ? 'video' : 'text'),
+          media_urls: mediaUrls,
           status: 'active',
           like_count: 0,
           comment_count: 0,
@@ -201,21 +272,24 @@ async function main() {
         }
       })
       posts.push(post)
-      console.log(`  ✓ 创建帖子: ${post.title}`)
+      console.log(`  ✓ 创建帖子: ${post.title} (${isImage ? '图片' : isVideo ? '视频' : '文本'})`)
     }
 
     // 岛屿帖子（9条）
     for (let i = 1; i <= 9; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
       const island = islands[Math.floor(Math.random() * islands.length)]
+      const hasImage = i % 2 === 0
+      // Prisma Json 类型直接传数组，不需要 JSON.stringify，null 用 undefined
+      const mediaUrls: string[] | undefined = hasImage ? [getPostImageUrl(i + 200)] : undefined
       const post = await prisma.post.create({
         data: {
           user_id: author.id,
           island_id: island.id,
           title: `岛屿帖子 ${i} - ${island.name}`,
           content: `这是发布在${island.name}的第${i}条帖子。`,
-          media_type: i % 2 === 0 ? 'image' : 'text',
-          media_urls: i % 2 === 0 ? JSON.stringify([`https://example.com/island/${i}.jpg`]) : null,
+          media_type: hasImage ? 'image' : 'text',
+          media_urls: mediaUrls,
           status: 'active',
           like_count: 0,
           comment_count: 0,
