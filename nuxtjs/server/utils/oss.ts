@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url)
 
 let OSSClient: OSSConstructor | null = null
 
-function getOSSClient() {
+function getOSSClient(): OSSConstructor {
   if (!OSSClient) {
     try {
       // 使用 require 加载 CommonJS 模块
@@ -27,9 +27,14 @@ function getOSSClient() {
       if (!OSSClient) {
         throw new Error('ali-oss module is not available')
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to load ali-oss:', error)
-      throw new Error(`Failed to load ali-oss module: ${error}`)
+      console.error('Error details:', {
+        message: error?.message,
+        code: error?.code,
+        stack: error?.stack
+      })
+      throw new Error(`Failed to load ali-oss module: ${error?.message || error}`)
     }
   }
   return OSSClient

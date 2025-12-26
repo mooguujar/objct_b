@@ -29,16 +29,13 @@ export default defineNuxtConfig({
         '.trycloudflare.com',
         'localhost'
       ]
-    },
-    optimizeDeps: {
-      exclude: ['ali-oss']
     }
   },
 
-  // Nitro 配置：将 ali-oss 设为外部依赖，避免打包时的 TypeScript 解析错误
+  // Nitro 配置：确保 ali-oss 被打包到 serverless 函数中
   nitro: {
     externals: {
-      inline: []
+      inline: ['ali-oss']
     }
   },
 
