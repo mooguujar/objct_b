@@ -245,24 +245,23 @@ async function main() {
     const allUsers = [...normalUsers, ...creatorUsers, ...islandOwners]
     const posts = []
 
-    // 普通帖子（10条）
+    // 普通帖子（10条）- 全部必须有图片或视频
     for (let i = 1; i <= 10; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
-      const isImage = i % 3 === 0
-      const isVideo = i % 3 === 1
-      // Prisma Json 类型直接传数组，不需要 JSON.stringify，null 用 undefined
-      const mediaUrls: string[] | undefined = isImage 
+      // 交替生成图片和视频，确保都有 media_urls
+      const isImage = i % 2 === 0
+      const isVideo = i % 2 === 1
+      // 所有帖子都必须有 media_urls
+      const mediaUrls: string[] = isImage 
         ? [getPostImageUrl(i)] 
-        : isVideo 
-        ? [getPostImageUrl(i + 100)] 
-        : undefined
+        : [getPostImageUrl(i + 100)]
       
       const post = await prisma.post.create({
         data: {
           user_id: author.id,
           title: `测试帖子标题 ${i}`,
           content: `这是第${i}条测试帖子的内容。包含一些示例文本，用于测试系统功能。`,
-          media_type: isImage ? 'image' : (isVideo ? 'video' : 'text'),
+          media_type: isImage ? 'image' : 'video',
           media_urls: mediaUrls,
           status: 'active',
           like_count: 0,
@@ -272,23 +271,22 @@ async function main() {
         }
       })
       posts.push(post)
-      console.log(`  ✓ 创建帖子: ${post.title} (${isImage ? '图片' : isVideo ? '视频' : '文本'})`)
+      console.log(`  ✓ 创建帖子: ${post.title} (${isImage ? '图片' : '视频'})`)
     }
 
-    // 岛屿帖子（9条）
+    // 岛屿帖子（9条）- 全部必须有图片
     for (let i = 1; i <= 9; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
       const island = islands[Math.floor(Math.random() * islands.length)]
-      const hasImage = i % 2 === 0
-      // Prisma Json 类型直接传数组，不需要 JSON.stringify，null 用 undefined
-      const mediaUrls: string[] | undefined = hasImage ? [getPostImageUrl(i + 200)] : undefined
+      // 所有岛屿帖子都必须有图片
+      const mediaUrls: string[] = [getPostImageUrl(i + 200)]
       const post = await prisma.post.create({
         data: {
           user_id: author.id,
           island_id: island.id,
           title: `岛屿帖子 ${i} - ${island.name}`,
           content: `这是发布在${island.name}的第${i}条帖子。`,
-          media_type: hasImage ? 'image' : 'text',
+          media_type: 'image',
           media_urls: mediaUrls,
           status: 'active',
           like_count: 0,
