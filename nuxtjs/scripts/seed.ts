@@ -10,6 +10,22 @@ async function main() {
   try {
     console.log('开始创建测试数据...\n')
 
+    // 检查数据库表是否存在
+    try {
+      await prisma.$queryRawUnsafe('SELECT 1 FROM `user` LIMIT 1')
+    } catch (error: any) {
+      if (error.message.includes("doesn't exist") || error.code === 'P2021') {
+        console.error('❌ 数据库表不存在！')
+        console.error('\n请先运行数据库迁移来创建表结构：')
+        console.error('  npm run db:reset')
+        console.error('  或')
+        console.error('  npm run db:migrate')
+        console.error('\n这将创建所有必需的数据表。')
+        process.exit(1)
+      }
+      throw error
+    }
+
     // 清空现有数据（可选，如果需要完全重置）
     // await prisma.$executeRaw`SET FOREIGN_KEY_CHECKS = 0`
     // await prisma.$executeRaw`TRUNCATE TABLE user`
@@ -32,7 +48,8 @@ async function main() {
           password_hash: testPassword,
           role: 'user',
           bio: `这是第${i}个普通用户的简介`,
-          coin_balance: 100 + i * 10
+          coin_balance: 100 + i * 10,
+          updated_at: new Date()
         }
       })
       normalUsers.push(user)
@@ -52,7 +69,8 @@ async function main() {
           role: 'creator',
           bio: `这是第${i}个创作者的简介`,
           coin_balance: 500 + i * 50,
-          is_verified: i <= 2 // 前2个创作者已验证
+          is_verified: i <= 2, // 前2个创作者已验证
+          updated_at: new Date()
         }
       })
       creatorUsers.push(user)
@@ -72,7 +90,8 @@ async function main() {
           role: 'creator',
           bio: `这是第${i}个岛屿创建者的简介`,
           coin_balance: 1000 + i * 100,
-          is_verified: true
+          is_verified: true,
+          updated_at: new Date()
         }
       })
       islandOwners.push(user)
@@ -90,7 +109,8 @@ async function main() {
         role: 'admin',
         bio: '系统管理员',
         coin_balance: 9999,
-        is_verified: true
+        is_verified: true,
+        updated_at: new Date()
       }
     })
     console.log(`  ✓ 创建管理员: ${adminUser.username}`)
@@ -114,7 +134,8 @@ async function main() {
           member_count: 0,
           post_count: 0,
           status: 'active',
-          is_verified: i < 3
+          is_verified: i < 3,
+          updated_at: new Date()
         }
       })
       islands.push(island)
@@ -128,7 +149,8 @@ async function main() {
         data: {
           user_id: island.owner_id,
           island_id: island.id,
-          join_type: 'free'
+          join_type: 'free',
+          updated_at: new Date()
         }
       })
 
@@ -140,7 +162,8 @@ async function main() {
             user_id: user.id,
             island_id: island.id,
             join_type: island.price > 0 ? 'paid' : 'free',
-            paid_amount: island.price
+            paid_amount: island.price,
+            updated_at: new Date()
           }
         })
       }
@@ -173,7 +196,8 @@ async function main() {
           status: 'active',
           like_count: 0,
           comment_count: 0,
-          view_count: Math.floor(Math.random() * 1000)
+          view_count: Math.floor(Math.random() * 1000),
+          updated_at: new Date()
         }
       })
       posts.push(post)
@@ -195,7 +219,8 @@ async function main() {
           status: 'active',
           like_count: 0,
           comment_count: 0,
-          view_count: Math.floor(Math.random() * 500)
+          view_count: Math.floor(Math.random() * 500),
+          updated_at: new Date()
         }
       })
       posts.push(post)
@@ -223,7 +248,8 @@ async function main() {
           post_id: post.id,
           user_id: author.id,
           content: `这是第${i}条评论，对帖子"${post.title}"的回复。`,
-          status: 'active'
+          status: 'active',
+          updated_at: new Date()
         }
       })
 

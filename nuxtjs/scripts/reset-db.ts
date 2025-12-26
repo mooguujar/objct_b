@@ -1,6 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import { execSync } from 'child_process'
 import dotenv from 'dotenv'
+import { existsSync, rmSync } from 'fs'
+import { join } from 'path'
 
 dotenv.config()
 
@@ -76,11 +78,50 @@ async function main() {
 
     // 3. 生成 Prisma Client
     console.log('步骤 3: 生成 Prisma Client...')
-    execSync('npx prisma generate', {
-      stdio: 'inherit',
-      cwd: process.cwd()
-    })
-    console.log('✓ Prisma Client 已生成\n')
+    
+    // Windows 权限问题处理：先删除旧的 .prisma 目录
+    const prismaClientPath = join(process.cwd(), 'node_modules', '.prisma', 'client')
+    if (existsSync(prismaClientPath)) {
+      try {
+        console.log('清理旧的 Prisma Client 文件...')
+        rmSync(prismaClientPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 1000 })
+      } catch (error) {
+        console.warn('⚠️  无法删除旧的 Prisma Client 文件，可能被其他进程占用')
+        console.warn('   请关闭所有运行中的开发服务器和 Node 进程后重试')
+      }
+    }
+    
+    // 重试机制
+    let retries = 3
+    let success = false
+    while (retries > 0 && !success) {
+      try {
+        execSync('npx prisma generate', {
+          stdio: 'inherit',
+          cwd: process.cwd()
+        })
+        success = true
+        console.log('✓ Prisma Client 已生成\n')
+      } catch (error: any) {
+        retries--
+        if (retries > 0) {
+          console.log(`生成失败，${retries} 次重试机会...`)
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        } else {
+          console.error('\n❌ Prisma Client 生成失败')
+          console.error('可能的原因：')
+          console.error('1. 文件被其他进程占用（开发服务器、IDE 等）')
+          console.error('2. 防病毒软件阻止了文件操作')
+          console.error('3. 文件权限不足')
+          console.error('\n解决方案：')
+          console.error('1. 关闭所有运行中的开发服务器（npm run dev）')
+          console.error('2. 关闭 VS Code 或其他 IDE')
+          console.error('3. 在任务管理器中结束所有 node.exe 进程')
+          console.error('4. 手动运行: npx prisma generate')
+          throw error
+        }
+      }
+    }
 
     console.log('✅ 数据库重置完成！')
     console.log('\n下一步：运行 npm run seed 创建测试数据')

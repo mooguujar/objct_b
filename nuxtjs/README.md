@@ -123,3 +123,34 @@ npm run preview
 - 数据库使用 BigInt 类型的ID，API返回时会转换为Number类型
 - 用户密码使用 bcrypt 加密存储
 - JWT token存储在localStorage中
+
+
+
+4. 一键初始化（推荐）
+你也可以一次性完成重置和创建测试数据：
+
+# 选项 1: 重置数据库并创建表结构（推荐）
+npm run db:reset
+
+# 选项 2: 使用 db:setup（重置 + 创建表 + 填充测试数据）
+npm run db:setup
+
+# 选项 3: 只运行迁移（如果已有迁移文件）
+npm run db:migrate
+
+# 选项 4: 直接推送 schema（如果没有迁移文件）
+npm run db:push
+
+npm run db:setup
+
+# 查看数据库（Prisma Studio）
+npm run db:studio
+
+# 创建新的迁移文件
+npm run db:migrate
+
+# 直接推送 schema 到数据库（不创建迁移文件）
+npm run db:push
+
+# 生成 Prisma Client
+npm run db:generate
