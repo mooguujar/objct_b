@@ -84,7 +84,7 @@ const { getFollowingPosts, toggleLike } = usePosts()
 const { trackPageView, trackClick } = useStatistics()
 
 const activeTab = ref<'following' | 'discover' | 'islands'>('following')
-const tabs = [
+const tabs: Array<{ key: 'following' | 'discover' | 'islands'; label: string }> = [
   { key: 'following', label: '关注' },
   { key: 'discover', label: '发现' },
   { key: 'islands', label: '热门岛屿' }
@@ -190,13 +190,15 @@ const goToDiscover = () => {
 }
 
 onMounted(async () => {
-  // 记录页面访问
-  trackPageView({
-    pagePath: '/following',
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
-    device: 'web'
-  })
+  // 记录页面访问（仅在客户端）
+  if (process.client) {
+    trackPageView({
+      pagePath: '/following',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      device: 'web'
+    })
+  }
 
   // 加载初始数据
   await loadData()

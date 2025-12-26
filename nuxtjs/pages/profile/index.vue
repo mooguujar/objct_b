@@ -312,13 +312,15 @@ const handleMenuClick = (menu: { key: string; label: string }) => {
 }
 
 onMounted(async () => {
-  // 记录页面访问
-  trackPageView({
-    pagePath: '/profile',
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
-    device: 'web'
-  })
+  // 记录页面访问（仅在客户端）
+  if (process.client) {
+    trackPageView({
+      pagePath: '/profile',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      device: 'web'
+    })
+  }
 
   // 加载用户信息
   await loadUserInfo()

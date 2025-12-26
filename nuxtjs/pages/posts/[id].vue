@@ -465,9 +465,11 @@ const scrollToComments = () => {
     pagePath: `/posts/${postId.value}`,
     content: { action: 'scroll-to-comments' }
   })
-  const commentsEl = document.getElementById('comments')
-  if (commentsEl) {
-    commentsEl.scrollIntoView({ behavior: 'smooth' })
+  if (process.client && typeof document !== 'undefined') {
+    const commentsEl = document.getElementById('comments')
+    if (commentsEl) {
+      commentsEl.scrollIntoView({ behavior: 'smooth' })
+    }
   }
 }
 
@@ -488,8 +490,8 @@ onMounted(async () => {
   // 记录页面访问
   trackPageView({
     pagePath: `/posts/${postId.value}`,
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
+    referrer: typeof document !== 'undefined' ? document.referrer : '',
+    userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
     device: 'web'
   })
 

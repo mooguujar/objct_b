@@ -276,13 +276,15 @@ const formatTime = (time: string) => {
 }
 
 onMounted(async () => {
-  // 记录页面访问
-  trackPageView({
-    pagePath: '/notifications',
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
-    device: 'web'
-  })
+  // 记录页面访问（仅在客户端）
+  if (process.client) {
+    trackPageView({
+      pagePath: '/notifications',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      device: 'web'
+    })
+  }
 
   // 加载通知数据
   await loadNotifications()

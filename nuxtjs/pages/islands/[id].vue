@@ -317,13 +317,15 @@ const loadPageData = async () => {
   await loadPosts()
   console.log('Data loaded')
 
-  // 统计接口在后台异步执行，不阻塞页面
-  trackPageView({
-    pagePath: `/islands/${islandId.value}`,
-    referrer: document.referrer,
-    userAgent: navigator.userAgent,
-    device: 'web'
-  })
+  // 统计接口在后台异步执行，不阻塞页面（仅在客户端）
+  if (process.client) {
+    trackPageView({
+      pagePath: `/islands/${islandId.value}`,
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
+      userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+      device: 'web'
+    })
+  }
 }
 
 // 监听路由变化

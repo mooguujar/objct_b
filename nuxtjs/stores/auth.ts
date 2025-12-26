@@ -22,16 +22,23 @@ export const useAuthStore = defineStore('auth', {
 
   getters: {
     isAuthenticated: (state) => {
-      // 在客户端检查，服务端总是返回 false
+      // 服务端总是返回 false，避免水合不匹配
       if (process.server) {
         return false
       }
-      // 同时检查 localStorage，确保数据一致
-      if (process.client) {
-        const token = localStorage.getItem('token')
-        const userStr = localStorage.getItem('user')
-        return !!(state.token && state.user && token && userStr)
+      // 客户端检查：优先使用 state，同时验证 localStorage
+      if (process.client && typeof window !== 'undefined') {
+        try {
+          const token = localStorage.getItem('token')
+          const userStr = localStorage.getItem('user')
+          // 如果 state 和 localStorage 都有数据，返回 true
+          return !!(state.token && state.user && token && userStr)
+        } catch {
+          // localStorage 访问失败时，仅使用 state
+          return !!state.token && !!state.user
+        }
       }
+      // 非客户端环境，仅使用 state
       return !!state.token && !!state.user
     },
     isAdmin: (state) => state.user?.role === 'admin'

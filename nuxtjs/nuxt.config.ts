@@ -3,11 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false }, // 完全禁用 devtools（生产环境不需要）
   
-      modules: [
-        '@element-plus/nuxt',
-        '@pinia/nuxt',
-        '@nuxtjs/tailwindcss'
-      ],
+  // SSR 配置，减少水合不匹配
+  ssr: true,
+  
+  modules: [
+    '@element-plus/nuxt',
+    '@pinia/nuxt',
+    '@nuxtjs/tailwindcss'
+  ],
 
   // CSS 会在组件中自动引入，或者在 app.vue 中引入
   // css: ['~/assets/styles/main.css'],
