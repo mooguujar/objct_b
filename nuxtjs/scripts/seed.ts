@@ -184,11 +184,15 @@ async function main() {
     
     for (let i = 0; i < 5; i++) {
       const owner = islandOwners[i % islandOwners.length]
+      const category = categories[i]
+      if (!owner || !category) {
+        throw new Error('无法获取岛屿所有者或分类')
+      }
       const island = await prisma.island.create({
         data: {
-          name: `${categories[i]}岛屿${i + 1}`,
-          description: `这是一个关于${categories[i]}的岛屿，欢迎加入！`,
-          category: categories[i],
+          name: `${category}岛屿${i + 1}`,
+          description: `这是一个关于${category}的岛屿，欢迎加入！`,
+          category: category,
           owner_id: owner.id,
           cover: getIslandCoverUrl(i + 1),
           avatar: getIslandAvatarUrl(i + 1),
@@ -248,6 +252,9 @@ async function main() {
     // 普通帖子（10条）- 全部必须有图片或视频
     for (let i = 1; i <= 10; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
+      if (!author) {
+        throw new Error('无法获取作者，用户数组为空')
+      }
       // 交替生成图片和视频，确保都有 media_urls
       const isImage = i % 2 === 0
       const isVideo = i % 2 === 1
@@ -278,6 +285,9 @@ async function main() {
     for (let i = 1; i <= 9; i++) {
       const author = allUsers[Math.floor(Math.random() * allUsers.length)]
       const island = islands[Math.floor(Math.random() * islands.length)]
+      if (!author || !island) {
+        throw new Error('无法获取作者或岛屿，数据数组为空')
+      }
       // 所有岛屿帖子都必须有图片
       const mediaUrls: string[] = [getPostImageUrl(i + 200)]
       const post = await prisma.post.create({
