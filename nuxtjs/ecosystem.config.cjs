@@ -2,6 +2,7 @@ module.exports = {
   apps: [{
     name: 'nuxtjs-app',
     script: '.output/server/index.mjs',
+    cwd: '.',
     instances: 2, // 使用 2 个实例，或 'max' 使用所有 CPU 核心
     exec_mode: 'cluster', // 集群模式
     // Node.js 16 需要 --experimental-fetch 来支持 fetch API
@@ -14,6 +15,8 @@ module.exports = {
     // 日志配置
     error_file: './logs/err.log',
     out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true,
     log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     merge_logs: true,
     // 自动重启
