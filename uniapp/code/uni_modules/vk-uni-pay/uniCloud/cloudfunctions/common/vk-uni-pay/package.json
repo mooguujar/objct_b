@@ -1,0 +1,19 @@
+{
+    "name": "vk-uni-pay",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "uni-config-center": "file:..\/..\/..\/..\/..\/uni-config-center\/uniCloud\/cloudfunctions\/common\/uni-config-center"
+    },
+    "origin-plugin-dev-name": "vk-uni-pay",
+    "origin-plugin-version": "1.16.3",
+    "plugin-dev-name": "xingyun-community",
+    "plugin-version": "1.0.0"
+}

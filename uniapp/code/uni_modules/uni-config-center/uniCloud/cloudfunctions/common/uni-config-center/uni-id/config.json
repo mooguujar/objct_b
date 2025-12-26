@@ -1,0 +1,94 @@
+{
+	"passwordSecret": "passwordSecret-demo",
+	"tokenSecret": "tokenSecret-demo",
+	"tokenExpiresIn": 604800,
+	"tokenExpiresThreshold": 259200,
+	"tokenMaxLimit": 10,
+	"passwordErrorLimit": 6,
+	"bindTokenToDevice": false,
+	"passwordErrorRetryTime": 3600,
+	"autoSetInviteCode": true,
+	"forceInviteCode": false,
+	"preferedAppPlatform": "app-plus",
+	"preferedWebPlatform": "h5",
+	"removeDcloudAppid": false,
+	"app-plus": {
+		"tokenExpiresIn": 604800,
+		"tokenExpiresThreshold": 259200,
+		"oauth": {
+			"weixin": {
+				"appid": "",
+				"appsecret": ""
+			},
+			"huawei": {
+				"clientId": "",
+				"clientSecret": ""
+			},
+			"apple": {
+				"bundleId": ""
+			}
+		}
+	},
+	"mp-weixin": {
+		"oauth": {
+			"weixin": {
+				"appid": "",
+				"appsecret": ""
+			}
+		}
+	},
+	"h5-weixin": {
+		"oauth": {
+			"weixin": {
+				"appid": "",
+				"appsecret": ""
+			}
+		}
+	},
+	"mp-alipay": {
+		"oauth": {
+			"alipay": {
+				"appid": "",
+				"privateKey": ""
+			}
+		}
+	},
+	"mp-qq": {
+		"oauth": {
+			"qq": {
+				"appid": "",
+				"appsecret": ""
+			}
+		}
+	},
+	"mp-toutiao": {
+		"oauth": {
+			"toutiao": {
+				"appid": "",
+				"appsecret": ""
+			}
+		}
+	},
+	"mp-harmony": {
+		"oauth": {
+			"huawei": {
+				"clientId": "",
+				"clientSecret": ""
+			}
+		}
+	},
+	"service": {
+		"sms": {
+			"name": "三春晖网络科技",
+			"codeExpiresIn": 180,
+			"templateId": "36996",
+			"smsKey": "b51e01fcbdbbe13ee7d4302344bef4ce",
+			"smsSecret": "ea1437da7f358c13a4b842954470f295"
+		},
+		"univerify": {
+			"appid": "",
+			"apiKey": "",
+			"apiSecret": ""
+		}
+	}
+}

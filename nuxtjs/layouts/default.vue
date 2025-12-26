@@ -1,13 +1,11 @@
 <template>
-  <div>
+  <div id="app">
     <slot />
   </div>
 </template>
 
-<script setup lang="ts">
-// 默认布局
-</script>
-
-<style scoped>
+<style>
+#app {
+  min-height: 100vh;
+}
 </style>
-

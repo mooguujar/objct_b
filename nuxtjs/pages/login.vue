@@ -1,61 +1,49 @@
 <template>
   <div class="login-container">
-    <div class="login-header">
-      <h1 class="login-title">欢迎回来</h1>
-      <p class="login-subtitle">登录您的账户</p>
-    </div>
-
     <el-card class="login-card">
-      <el-form
-        ref="loginFormRef"
-        :model="form"
-        :rules="rules"
-        label-width="0"
-        size="large"
-      >
-        <el-form-item prop="username">
+      <template #header>
+        <div class="card-header">
+          <h2>登录</h2>
+        </div>
+      </template>
+      
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
+        <el-form-item label="用户名" prop="username">
           <el-input
             v-model="form.username"
-            placeholder="请输入用户名/手机号/邮箱"
-            :prefix-icon="User"
+            placeholder="请输入用户名、邮箱或手机号"
             clearable
           />
         </el-form-item>
-
-        <el-form-item prop="password">
+        
+        <el-form-item label="密码" prop="password">
           <el-input
             v-model="form.password"
             type="password"
             placeholder="请输入密码"
-            :prefix-icon="Lock"
             show-password
-            clearable
             @keyup.enter="handleLogin"
           />
         </el-form-item>
-
-        <div class="login-options">
-          <el-link type="primary" :underline="false" @click="handleForgotPassword">
-            忘记密码？
-          </el-link>
-        </div>
-
+        
         <el-form-item>
           <el-button
             type="primary"
             :loading="loading"
-            :disabled="loading"
-            class="login-button"
             @click="handleLogin"
+            style="width: 100%"
           >
             登录
           </el-button>
         </el-form-item>
-
-        <div class="register-link">
-          <span>还没有账户？</span>
-          <el-link type="primary" @click="handleRegister">立即注册</el-link>
-        </div>
+        
+        <el-form-item>
+          <div class="login-footer">
+            <el-link type="primary" :underline="false" @click="goToRegister">
+              还没有账号？立即注册
+            </el-link>
+          </div>
+        </el-form-item>
       </el-form>
     </el-card>
   </div>
@@ -63,98 +51,86 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { User, Lock } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '~/store/user'
-import { useApi } from '~/composables/useApi'
+import { useAuth } from '../composables/useAuth'
+import { useStatistics } from '../composables/useStatistics'
+import { ElMessage } from 'element-plus'
 
 definePageMeta({
-  layout: false,
-  middleware: 'guest',
+  layout: false
 })
 
 const router = useRouter()
-const userStore = useUserStore()
-const api = useApi()
+const route = useRoute()
+const { login } = useAuth()
+const { trackClick } = useStatistics()
 
-const loginFormRef = ref()
+const formRef = ref()
 const loading = ref(false)
 
 const form = reactive({
   username: '',
-  password: '',
+  password: ''
 })
 
 const rules = {
   username: [
-    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { required: true, message: '请输入用户名', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码至少6个字符', trigger: 'blur' },
-  ],
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+  ]
 }
 
 const handleLogin = async () => {
-  try {
-    await loginFormRef.value.validate()
-
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid: boolean) => {
+    if (!valid) return
+    
     loading.value = true
-
-    const result = await api.post('/auth/login', {
-      username: form.username,
-      password: form.password,
+    
+    // 统计点击事件
+    trackClick({
+      elementId: 'login-button',
+      elementType: 'button',
+      pagePath: '/login',
+      content: { action: 'login' }
     })
-
-    // 保存用户信息和Token
-    userStore.setUser(result.user)
-    userStore.setToken(result.token, result.refreshToken)
-
-    // 跳转到首页
-    await router.push('/')
-  } catch (error: any) {
-    ElMessage.error(error.message || '登录失败')
-  } finally {
+    
+    const result = await login(form.username, form.password)
     loading.value = false
-  }
+    
+    if (result.success) {
+      ElMessage.success(result.message)
+      // 登录成功后，跳转到原始页面或首页
+      const redirect = route.query.redirect as string || '/'
+      router.push(redirect)
+    } else {
+      ElMessage.error(result.message)
+    }
+  })
 }
 
-const handleRegister = () => {
+const goToRegister = () => {
+  trackClick({
+    elementId: 'register-link',
+    elementType: 'link',
+    pagePath: '/login',
+    content: { action: 'navigate-to-register' }
+  })
   router.push('/register')
-}
-
-const handleForgotPassword = () => {
-  // TODO: 跳转到忘记密码页面
-  ElMessage.info('忘记密码功能开发中')
 }
 </script>
 
 <style scoped>
 .login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 40px;
-
-  .login-title {
-    font-size: 36px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 10px;
-  }
-
-  .login-subtitle {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
-  }
+  padding: 20px;
 }
 
 .login-card {
@@ -162,24 +138,18 @@ const handleForgotPassword = () => {
   max-width: 400px;
 }
 
-.login-options {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 20px;
-}
-
-.login-button {
-  width: 100%;
-}
-
-.register-link {
+.card-header {
   text-align: center;
-  margin-top: 20px;
-  color: #606266;
+}
 
-  .el-link {
-    margin-left: 5px;
-  }
+.card-header h2 {
+  margin: 0;
+  color: #303133;
+}
+
+.login-footer {
+  width: 100%;
+  text-align: center;
 }
 </style>
 

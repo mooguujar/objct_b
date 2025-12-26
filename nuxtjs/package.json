@@ -1,31 +1,51 @@
 {
-  "name": "island-social-nuxtjs",
-  "version": "1.0.0",
-  "description": "岛屿社交平台 Web端",
+  "name": "nuxtjs",
+  "type": "module",
   "private": true,
   "scripts": {
     "build": "nuxt build",
+    "build:prod": "cross-env NODE_ENV=production nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "db:test": "tsx scripts/test-db.ts",
+    "db:reset": "tsx scripts/reset-db.ts",
+    "db:seed": "tsx scripts/seed.ts",
+    "db:setup": "npm run db:reset && npm run db:seed",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:generate": "prisma generate",
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@element-plus/nuxt": "^1.1.4",
-    "@nuxtjs/tailwindcss": "^6.11.0",
-    "@pinia/nuxt": "^0.5.1",
-    "element-plus": "^2.5.0",
-    "nuxt": "^3.9.0",
-    "pinia": "^2.1.7",
-    "axios": "^1.6.0",
-    "vue": "^3.4.0",
-    "vue-router": "^4.2.5"
+    "@pinia/nuxt": "^0.11.3",
+    "@prisma/client": "^6.19.1",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.3",
+    "element-plus": "^2.13.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.16.0",
+    "nuxt": "^4.2.2",
+    "pinia": "^3.0.4",
+    "prisma": "^6.19.1",
+    "sharp": "^0.34.5",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4",
+    "@vue/devtools-api": "^7.7.9"
   },
   "devDependencies": {
-    "@nuxt/devtools": "latest",
-    "@types/node": "^20.10.0",
-    "sass": "^1.69.0",
-    "typescript": "^5.3.0"
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/ali-oss": "^6.16.13",
+    "@types/node": "^25.0.3",
+    "autoprefixer": "^10.4.23",
+    "cross-env": "^7.0.3",
+    "dotenv": "^17.2.3",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "tsx": "^4.21.0"
   }
 }
-

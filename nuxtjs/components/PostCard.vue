@@ -1,66 +1,108 @@
 <template>
-  <div class="post-card" @click="handleClick">
-    <!-- 封面图片/视频 -->
-    <div v-if="post.mediaUrls && post.mediaUrls.length > 0" class="post-media">
-      <img
-        v-if="post.mediaType === 'image'"
+  <div class="post-card" @click="handleCardClick">
+    <!-- 媒体内容 -->
+    <div v-if="post.mediaUrls && post.mediaUrls.length > 0" class="post-media" @click.stop="handleImageClick">
+      <el-image
+        v-if="post.mediaType === 'image' || post.mediaType === 'mixed'"
         :src="post.mediaUrls[0]"
-        loading="lazy"
-        class="media-image"
-        alt=""
+        :alt="post.title || '图片'"
+        class="post-image"
+        :preview-src-list="post.mediaUrls"
+        :initial-index="0"
+        fit="cover"
+        preview-teleported
+        lazy
       />
-      <video
-        v-else-if="post.mediaType === 'video'"
-        :src="post.mediaUrls[0]"
-        class="media-video"
-        :poster="post.mediaUrls[0]"
-      />
-      <!-- 图片数量标识 -->
-      <div v-if="post.mediaUrls.length > 1" class="image-count">
-        +{{ post.mediaUrls.length - 1 }}
-      </div>
+      <div v-if="post.mediaUrls.length > 1" class="media-count">+{{ post.mediaUrls.length - 1 }}</div>
     </div>
 
-    <!-- 内容区域 -->
+    <!-- 标题和内容 -->
     <div class="post-content">
-      <!-- 标题和描述 -->
-      <div v-if="post.title || post.content" class="post-header">
-        <h3 v-if="post.title" class="post-title">{{ post.title }}</h3>
-        <p v-if="post.content" class="post-text">{{ post.content }}</p>
-      </div>
+      <h3 v-if="post.title" class="post-title">{{ post.title }}</h3>
+      <p v-if="post.content" class="post-text">{{ truncateText(post.content, 100) }}</p>
+    </div>
 
-      <!-- 发布者信息 -->
-      <div class="post-author">
-        <img
-          :src="post.user.avatar || '/default-avatar.png'"
-          loading="lazy"
-          class="author-avatar"
-          alt=""
-        />
-        <span class="author-name">{{ post.user.nickname }}</span>
+    <!-- 用户信息 -->
+    <div class="post-footer">
+      <div class="user-info">
+        <el-avatar :src="post.user.avatar" :size="24">
+          {{ post.user.nickname?.[0] || post.user.username?.[0] }}
+        </el-avatar>
+        <span class="username">{{ post.user.nickname || post.user.username }}</span>
       </div>
-
-      <!-- 底部信息 -->
-      <div class="post-footer">
-        <div class="post-stats">
-          <el-icon><Star /></el-icon>
-          <span class="stat-text">{{ post.likeCount || 0 }}</span>
-        </div>
+      <div class="post-actions">
+        <el-button
+          :icon="post.isLiked ? 'HeartFilled' : 'Heart'"
+          :type="post.isLiked ? 'danger' : 'default'"
+          text
+          size="small"
+          @click.stop="handleLike"
+        >
+          {{ post.likeCount }}
+        </el-button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { Post } from '../composables/usePosts'
+import { usePosts } from '../composables/usePosts'
+import { useStatistics } from '../composables/useStatistics'
+import { ElMessage } from 'element-plus'
+
 interface Props {
-  post: any
+  post: Post
 }
 
 const props = defineProps<Props>()
+const emit = defineEmits<{
+  likeChange: [postId: number, isLiked: boolean, likeCount: number]
+  click: [postId: number]
+}>()
 
-const handleClick = () => {
-  // TODO: 跳转到详情页
-  ElMessage.info('详情页开发中')
+const { toggleLike } = usePosts()
+const { trackClick } = useStatistics()
+
+const truncateText = (text: string, maxLength: number) => {
+  if (text.length <= maxLength) return text
+  return text.slice(0, maxLength) + '...'
+}
+
+const handleLike = async () => {
+  try {
+    trackClick({
+      elementId: `like-button-${props.post.id}`,
+      elementType: 'button',
+      pagePath: '/',
+      content: { action: 'like', postId: props.post.id }
+    })
+
+    const result = await toggleLike(props.post.id)
+    emit('likeChange', props.post.id, result.isLiked, result.likeCount)
+  } catch (error: any) {
+    ElMessage.error(error.message || '操作失败')
+  }
+}
+
+const handleCardClick = () => {
+  trackClick({
+    elementId: `post-card-${props.post.id}`,
+    elementType: 'card',
+    pagePath: '/',
+    content: { action: 'view-post', postId: props.post.id }
+  })
+  emit('click', props.post.id)
+}
+
+const handleImageClick = () => {
+  trackClick({
+    elementId: `post-image-${props.post.id}`,
+    elementType: 'image',
+    pagePath: '/',
+    content: { action: 'preview-image', postId: props.post.id }
+  })
+  // el-image 组件会自动处理预览，这里只记录统计
 }
 </script>
 
@@ -69,99 +111,92 @@ const handleClick = () => {
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
 }
 
 .post-card:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .post-media {
   position: relative;
   width: 100%;
-  height: 300px;
+  aspect-ratio: 1;
   overflow: hidden;
+  background: #f5f5f5;
 }
 
-.media-image,
-.media-video {
+.post-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.image-count {
+.media-count {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  bottom: 8px;
+  right: 8px;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
-  padding: 4px 12px;
+  padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
 }
 
 .post-content {
-  padding: 16px;
-}
-
-.post-header {
-  margin-bottom: 12px;
+  padding: 12px;
+  flex: 1;
 }
 
 .post-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 8px;
-}
-
-.post-text {
   font-size: 14px;
-  color: #606266;
-  line-height: 1.6;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #303133;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.post-author {
-  display: flex;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.author-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 12px;
-}
-
-.author-name {
-  font-size: 14px;
-  color: #303133;
+.post-text {
+  font-size: 12px;
+  color: #606266;
+  margin: 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .post-footer {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding-top: 12px;
-  border-top: 1px solid #e4e7ed;
+  align-items: center;
+  padding: 8px 12px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.post-stats {
+.user-info {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.username {
   font-size: 12px;
-  color: #909399;
+  color: #606266;
+}
+
+.post-actions {
+  display: flex;
+  gap: 8px;
 }
 </style>
 

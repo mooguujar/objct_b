@@ -1,0 +1,21 @@
+{
+	"action": "pay/createPayment",
+	"data": {
+		"out_trade_no": "test202501110001",
+		"total_fee": 1,
+		"type": "goods",
+		"subject": "测试商品",
+		"provider": "wxpay"
+	},
+	/**
+	 * 模拟客户端环境
+	 * 浏览器：h5
+	 * APP：app-plus
+	 * 微信小程序：mp-weixin
+	 * 支付宝小程序：mp-alipay
+	 * 抖音小程序：mp-toutiao
+	 */
+	"clientInfo": {
+		"PLATFORM": "h5"
+	}
+}

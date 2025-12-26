@@ -1,0 +1,134 @@
+
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "星云社区",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/category/list",
+			"style": {
+				"navigationBarTitleText": "关注",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/publish/index",
+			"style": {
+				"navigationBarTitleText": "发布",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/notification/index",
+			"style": {
+				"navigationBarTitleText": "消息",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/profile/index",
+			"style": {
+				"navigationBarTitleText": "我的",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/article/detail",
+			"style": {
+				"navigationBarTitleText": "文章详情",
+				"enablePullDownRefresh": false
+			}
+		},
+		
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/register/index",
+			"style": {
+				"navigationBarTitleText": "注册",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/profile/favorites",
+			"style": {
+				"navigationBarTitleText": "我的收藏",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/profile/history",
+			"style": {
+				"navigationBarTitleText": "浏览历史",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/profile/settings",
+			"style": {
+				"navigationBarTitleText": "设置",
+				"enablePullDownRefresh": false
+			}
+		},
+		{
+			"path": "pages/profile/edit",
+			"style": {
+				"navigationBarTitleText": "编辑资料",
+				"enablePullDownRefresh": false
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#F7F7F7",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-active.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/category/list",
+				"iconPath": "static/tabbar/category.png",
+				"selectedIconPath": "static/tabbar/category-active.png",
+				"text": "关注"
+			},
+			{
+				"pagePath": "pages/publish/index",
+				"iconPath": "static/tabbar/publish.png",
+				"selectedIconPath": "static/tabbar/publish-active.png",
+				"text": "发布"
+			},
+			{
+				"pagePath": "pages/notification/index",
+				"iconPath": "static/tabbar/notification.png",
+				"selectedIconPath": "static/tabbar/notification-active.png",
+				"text": "消息"
+			},
+			{
+				"pagePath": "pages/profile/index",
+				"iconPath": "static/tabbar/profile.png",
+				"selectedIconPath": "static/tabbar/profile-active.png",
+				"text": "我的"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "星云社区",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	}
+}

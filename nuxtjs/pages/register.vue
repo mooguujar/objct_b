@@ -1,92 +1,74 @@
 <template>
   <div class="register-container">
-    <div class="register-header">
-      <h1 class="register-title">创建账户</h1>
-      <p class="register-subtitle">加入岛屿社交平台</p>
-    </div>
-
     <el-card class="register-card">
-      <el-form
-        ref="registerFormRef"
-        :model="form"
-        :rules="rules"
-        label-width="0"
-        size="large"
-      >
-        <el-form-item prop="username">
+      <template #header>
+        <div class="card-header">
+          <h2>注册</h2>
+        </div>
+      </template>
+      
+      <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
+        <el-form-item label="用户名" prop="username">
           <el-input
             v-model="form.username"
-            placeholder="请输入用户名（3-50字符）"
-            :prefix-icon="User"
+            placeholder="请输入用户名"
             clearable
           />
         </el-form-item>
-
-        <el-form-item prop="nickname">
-          <el-input
-            v-model="form.nickname"
-            placeholder="请输入昵称"
-            :prefix-icon="User"
-            clearable
-          />
-        </el-form-item>
-
-        <el-form-item prop="password">
+        
+        <el-form-item label="密码" prop="password">
           <el-input
             v-model="form.password"
             type="password"
-            placeholder="请输入密码（6-20字符）"
-            :prefix-icon="Lock"
+            placeholder="请输入密码（至少6位）"
             show-password
-            clearable
           />
         </el-form-item>
-
-        <el-form-item prop="confirmPassword">
+        
+        <el-form-item label="确认密码" prop="confirmPassword">
           <el-input
             v-model="form.confirmPassword"
             type="password"
             placeholder="请再次输入密码"
-            :prefix-icon="Lock"
             show-password
-            clearable
+            @keyup.enter="handleRegister"
           />
         </el-form-item>
-
-        <el-form-item prop="phone">
-          <el-input
-            v-model="form.phone"
-            placeholder="请输入手机号（可选）"
-            :prefix-icon="Phone"
-            clearable
-          />
-        </el-form-item>
-
-        <el-form-item prop="email">
+        
+        <el-form-item label="邮箱" prop="email">
           <el-input
             v-model="form.email"
             placeholder="请输入邮箱（可选）"
-            :prefix-icon="Message"
             clearable
           />
         </el-form-item>
-
+        
+        <el-form-item label="手机号" prop="phone">
+          <el-input
+            v-model="form.phone"
+            placeholder="请输入手机号（可选）"
+            clearable
+          />
+        </el-form-item>
+        
         <el-form-item>
           <el-button
             type="primary"
             :loading="loading"
-            :disabled="loading"
-            class="register-button"
             @click="handleRegister"
+            style="width: 100%"
           >
             注册
           </el-button>
         </el-form-item>
-
-        <div class="login-link">
-          <span>已有账户？</span>
-          <el-link type="primary" @click="handleLogin">立即登录</el-link>
-        </div>
+        
+        <el-form-item>
+          <div class="register-footer">
+            <el-link type="primary" :underline="false" @click="goToLogin">
+              已有账号？立即登录
+            </el-link>
+          </div>
+        </el-form-item>
       </el-form>
     </el-card>
   </div>
@@ -94,33 +76,30 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
-import { User, Lock, Phone, Message } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
-import { useUserStore } from '~/store/user'
-import { useApi } from '~/composables/useApi'
+import { useAuth } from '../composables/useAuth'
+import { useStatistics } from '../composables/useStatistics'
+import { ElMessage } from 'element-plus'
 
 definePageMeta({
-  layout: false,
-  middleware: 'guest',
+  layout: false
 })
 
 const router = useRouter()
-const userStore = useUserStore()
-const api = useApi()
+const { register } = useAuth()
+const { trackClick } = useStatistics()
 
-const registerFormRef = ref()
+const formRef = ref()
 const loading = ref(false)
 
 const form = reactive({
   username: '',
-  nickname: '',
   password: '',
   confirmPassword: '',
-  phone: '',
   email: '',
+  phone: ''
 })
 
-const validateConfirmPassword = (rule: any, value: any, callback: any) => {
+const validateConfirmPassword = (rule: any, value: string, callback: Function) => {
   if (value !== form.password) {
     callback(new Error('两次输入的密码不一致'))
   } else {
@@ -131,109 +110,95 @@ const validateConfirmPassword = (rule: any, value: any, callback: any) => {
 const rules = {
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
-    { min: 3, max: 50, message: '用户名长度为3-50个字符', trigger: 'blur' },
-  ],
-  nickname: [
-    { required: true, message: '请输入昵称', trigger: 'blur' },
-    { min: 1, max: 50, message: '昵称长度为1-50个字符', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度在3到20个字符', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, max: 20, message: '密码长度为6-20个字符', trigger: 'blur' },
+    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
   ],
   confirmPassword: [
-    { required: true, message: '请再次输入密码', trigger: 'blur' },
-    { validator: validateConfirmPassword, trigger: 'blur' },
-  ],
-  phone: [
-    {
-      pattern: /^1[3-9]\d{9}$/,
-      message: '手机号格式不正确',
-      trigger: 'blur',
-    },
+    { required: true, message: '请确认密码', trigger: 'blur' },
+    { validator: validateConfirmPassword, trigger: 'blur' }
   ],
   email: [
-    { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
   ],
+  phone: [
+    { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号', trigger: 'blur' }
+  ]
 }
 
 const handleRegister = async () => {
-  try {
-    await registerFormRef.value.validate()
-
+  if (!formRef.value) return
+  
+  await formRef.value.validate(async (valid: boolean) => {
+    if (!valid) return
+    
     loading.value = true
-
-    const result = await api.post('/auth/register', {
-      username: form.username,
-      nickname: form.nickname,
-      password: form.password,
-      phone: form.phone || undefined,
-      email: form.email || undefined,
+    
+    // 统计点击事件
+    trackClick({
+      elementId: 'register-button',
+      elementType: 'button',
+      pagePath: '/register',
+      content: { action: 'register' }
     })
-
-    // 保存用户信息和Token
-    userStore.setUser(result.user)
-    userStore.setToken(result.token, result.refreshToken)
-
-    // 跳转到首页
-    await router.push('/')
-  } catch (error: any) {
-    ElMessage.error(error.message || '注册失败')
-  } finally {
+    
+    const result = await register({
+      username: form.username,
+      password: form.password,
+      email: form.email || undefined,
+      phone: form.phone || undefined
+    })
     loading.value = false
-  }
+    
+    if (result.success) {
+      ElMessage.success(result.message)
+      router.push('/')
+    } else {
+      ElMessage.error(result.message)
+    }
+  })
 }
 
-const handleLogin = () => {
+const goToLogin = () => {
+  trackClick({
+    elementId: 'login-link',
+    elementType: 'link',
+    pagePath: '/register',
+    content: { action: 'navigate-to-login' }
+  })
   router.push('/login')
 }
 </script>
 
 <style scoped>
 .register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-}
-
-.register-header {
-  text-align: center;
-  margin-bottom: 40px;
-
-  .register-title {
-    font-size: 36px;
-    font-weight: bold;
-    color: #fff;
-    margin-bottom: 10px;
-  }
-
-  .register-subtitle {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.8);
-  }
+  padding: 20px;
 }
 
 .register-card {
   width: 100%;
-  max-width: 450px;
+  max-width: 500px;
 }
 
-.register-button {
-  width: 100%;
-}
-
-.login-link {
+.card-header {
   text-align: center;
-  margin-top: 20px;
-  color: #606266;
+}
 
-  .el-link {
-    margin-left: 5px;
-  }
+.card-header h2 {
+  margin: 0;
+  color: #303133;
+}
+
+.register-footer {
+  width: 100%;
+  text-align: center;
 }
 </style>
 

@@ -1,0 +1,355 @@
+/* 响应式设计样式 */
+
+// 小屏设备适配
+@media screen and (max-width: 375px) {
+  .page-container {
+    padding: 15rpx;
+  }
+  
+  .card-item {
+    margin: 15rpx 0;
+    padding: 20rpx;
+    border-radius: 12rpx;
+  }
+  
+  .btn-large {
+    height: 80rpx;
+    font-size: 28rpx;
+    border-radius: 40rpx;
+  }
+  
+  .text-large {
+    font-size: 30rpx;
+  }
+  
+  .text-title {
+    font-size: 32rpx;
+  }
+}
+
+// 大屏设备适配
+@media screen and (min-width: 768px) {
+  .page-container {
+    max-width: 750rpx;
+    margin: 0 auto;
+    padding: 30rpx;
+  }
+  
+  .card-item {
+    margin: 20rpx 0;
+    padding: 40rpx;
+    border-radius: 25rpx;
+  }
+  
+  .btn-large {
+    height: 100rpx;
+    font-size: 36rpx;
+    border-radius: 50rpx;
+  }
+  
+  .text-large {
+    font-size: 40rpx;
+  }
+  
+  .text-title {
+    font-size: 44rpx;
+  }
+  
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30rpx;
+  }
+}
+
+// 横屏模式适配
+@media screen and (orientation: landscape) {
+  .page-container {
+    padding: 20rpx 40rpx;
+  }
+  
+  .card-item {
+    margin: 15rpx 0;
+    padding: 30rpx;
+  }
+  
+  .flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20rpx;
+  }
+  
+  .flex-item {
+    flex: 1 1 300rpx;
+  }
+}
+
+// 安全区域适配（iPhone X及以上）
+@supports (padding-bottom: constant(safe-area-inset-bottom)) {
+  .page-container {
+    padding-bottom: calc(30rpx + constant(safe-area-inset-bottom));
+  }
+  
+  .bottom-actions {
+    padding-bottom: calc(20rpx + constant(safe-area-inset-bottom));
+  }
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .page-container {
+    padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
+  }
+  
+  .bottom-actions {
+    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  }
+}
+
+// 暗黑模式适配
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #3d3d3d;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-tertiary: #999999;
+    --border-color: #404040;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+  }
+  
+  .page-container {
+    background-color: var(--bg-primary);
+  }
+  
+  .card-item {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    box-shadow: 0 4rpx 20rpx var(--shadow-color);
+    
+    &:active {
+      background-color: var(--bg-tertiary);
+    }
+  }
+  
+  .text-primary {
+    color: var(--text-primary);
+  }
+  
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+  
+  .text-tertiary {
+    color: var(--text-tertiary);
+  }
+  
+  .border-bottom {
+    border-bottom-color: var(--border-color);
+  }
+}
+
+// 字体大小适配
+.text-xs { font-size: 20rpx; }
+.text-sm { font-size: 24rpx; }
+.text-base { font-size: 28rpx; }
+.text-lg { font-size: 32rpx; }
+.text-xl { font-size: 36rpx; }
+.text-2xl { font-size: 40rpx; }
+.text-3xl { font-size: 48rpx; }
+.text-4xl { font-size: 56rpx; }
+
+// 间距适配
+.space-0 { margin: 0; }
+.space-1 { margin: 10rpx; }
+.space-2 { margin: 20rpx; }
+.space-3 { margin: 30rpx; }
+.space-4 { margin: 40rpx; }
+.space-5 { margin: 50rpx; }
+
+// 圆角适配
+.rounded-none { border-radius: 0; }
+.rounded-sm { border-radius: 8rpx; }
+.rounded { border-radius: 12rpx; }
+.rounded-md { border-radius: 16rpx; }
+.rounded-lg { border-radius: 20rpx; }
+.rounded-xl { border-radius: 30rpx; }
+.rounded-full { border-radius: 50%; }
+
+// 阴影适配
+.shadow-none { box-shadow: none; }
+.shadow-sm { box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05); }
+.shadow { box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08); }
+.shadow-md { box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.12); }
+.shadow-lg { box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.16); }
+.shadow-xl { box-shadow: 0 12rpx 48rpx rgba(0, 0, 0, 0.2); }
+
+// 按钮大小适配
+.btn-xs {
+  height: 50rpx;
+  font-size: 22rpx;
+  border-radius: 25rpx;
+  padding: 0 20rpx;
+}
+
+.btn-sm {
+  height: 60rpx;
+  font-size: 24rpx;
+  border-radius: 30rpx;
+  padding: 0 25rpx;
+}
+
+.btn-md {
+  height: 70rpx;
+  font-size: 26rpx;
+  border-radius: 35rpx;
+  padding: 0 30rpx;
+}
+
+.btn-lg {
+  height: 80rpx;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  padding: 0 40rpx;
+}
+
+.btn-xl {
+  height: 90rpx;
+  font-size: 30rpx;
+  border-radius: 45rpx;
+  padding: 0 50rpx;
+}
+
+// 图片适配
+.img-responsive {
+  max-width: 100%;
+  height: auto;
+}
+
+.img-cover {
+  object-fit: cover;
+}
+
+.img-contain {
+  object-fit: contain;
+}
+
+.img-rounded {
+  border-radius: 12rpx;
+}
+
+.img-circle {
+  border-radius: 50%;
+}
+
+// 布局适配
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.flex-auto {
+  flex: auto;
+}
+
+.flex-none {
+  flex: none;
+}
+
+.justify-start {
+  justify-content: flex-start;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-end {
+  justify-content: flex-end;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-around {
+  justify-content: space-around;
+}
+
+.items-start {
+  align-items: flex-start;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.items-end {
+  align-items: flex-end;
+}
+
+.items-stretch {
+  align-items: stretch;
+}
+
+// 隐藏元素适配
+.hidden {
+  display: none;
+}
+
+.block {
+  display: block;
+}
+
+.inline {
+  display: inline;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+// 位置适配
+.relative {
+  position: relative;
+}
+
+.absolute {
+  position: absolute;
+}
+
+.fixed {
+  position: fixed;
+}
+
+.sticky {
+  position: sticky;
+}
+
+// 溢出处理
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.overflow-auto {
+  overflow: auto;
+}
+
+.overflow-scroll {
+  overflow: scroll;
+}
+
+.overflow-visible {
+  overflow: visible;
+}
