@@ -29,7 +29,23 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-echo "✓ Node.js 版本: $(node --version)"
+NODE_VERSION=$(node -v)
+NODE_MAJOR_VERSION=$(echo $NODE_VERSION | cut -d'v' -f2 | cut -d'.' -f1)
+
+echo "✓ Node.js 版本: $NODE_VERSION"
+
+# 检查 Node.js 版本并提示
+if [ "$NODE_MAJOR_VERSION" -lt 16 ]; then
+    echo "❌ 错误: Node.js 版本过低，需要 Node.js 16.11.0+ (推荐 18+)"
+    echo "当前版本: $NODE_VERSION"
+    exit 1
+elif [ "$NODE_MAJOR_VERSION" -eq 16 ]; then
+    echo "ℹ️  检测到 Node.js 16，将使用 --experimental-fetch 标志（因为使用了 fetch API）"
+    USE_EXPERIMENTAL_FETCH=true
+elif [ "$NODE_MAJOR_VERSION" -ge 18 ]; then
+    echo "✓ Node.js 版本满足要求（18+ 原生支持 fetch）"
+    USE_EXPERIMENTAL_FETCH=false
+fi
 
 # 3. 检查环境变量文件
 if [ ! -f ".env" ]; then
@@ -104,12 +120,22 @@ case $choice in
             echo "查看日志: pm2 logs $APP_NAME"
         else
             echo "未找到 ecosystem.config.js，使用简单方式启动..."
-            pm2 start .output/server/index.mjs --name $APP_NAME
+            if [ "$USE_EXPERIMENTAL_FETCH" = true ]; then
+                echo "⚠️  使用 Node.js 16，添加 --experimental-fetch 标志"
+                pm2 start .output/server/index.mjs --name $APP_NAME --node-args="--experimental-fetch"
+            else
+                pm2 start .output/server/index.mjs --name $APP_NAME
+            fi
         fi
         ;;
     2)
         echo "直接运行 Node.js..."
-        node .output/server/index.mjs
+        if [ "$USE_EXPERIMENTAL_FETCH" = true ]; then
+            echo "⚠️  使用 Node.js 16，添加 --experimental-fetch 标志"
+            node --experimental-fetch .output/server/index.mjs
+        else
+            node .output/server/index.mjs
+        fi
         ;;
     *)
         echo "无效选择"

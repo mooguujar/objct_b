@@ -4,6 +4,9 @@ module.exports = {
     script: '.output/server/index.mjs',
     instances: 2, // 使用 2 个实例，或 'max' 使用所有 CPU 核心
     exec_mode: 'cluster', // 集群模式
+    // Node.js 16 需要 --experimental-fetch 来支持 fetch API
+    // 如果是 Node.js 18+ 可以移除这个参数
+    node_args: '--experimental-fetch',
     env: {
       NODE_ENV: 'production',
       PORT: 3000
