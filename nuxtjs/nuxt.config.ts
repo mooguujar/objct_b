@@ -32,12 +32,6 @@ export default defineNuxtConfig({
     }
   },
 
-  // Nitro 配置：确保 ali-oss 被打包到 serverless 函数中
-  nitro: {
-    externals: {
-      inline: ['ali-oss']
-    }
-  },
 
   // 开发服务器配置
   devServer: {

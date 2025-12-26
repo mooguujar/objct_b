@@ -23,7 +23,6 @@
     "@prisma/client": "^6.19.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "ali-oss": "^6.23.0",
     "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "element-plus": "^2.13.0",
