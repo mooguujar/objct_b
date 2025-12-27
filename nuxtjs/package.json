@@ -14,9 +14,11 @@
     "db:seed": "tsx scripts/seed.ts",
     "db:setup": "npm run db:reset && npm run db:seed",
     "db:migrate": "prisma migrate dev",
+    "db:migrate:deploy": "prisma migrate deploy",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "db:fix": "prisma generate && prisma migrate deploy"
   },
   "dependencies": {
     "@element-plus/nuxt": "^1.1.4",
